@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import DataTable from "@/components/DataTable";
 import DataVisualizer from "@/components/DataVisualizer";
 import { Badge } from "@/components/ui/badge";
 
@@ -76,16 +75,6 @@ const Index = () => {
             </p>
           </div>
           <div className="flex gap-4">
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="Search data..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 w-64"
-              />
-              <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-            </div>
             <Button
               variant="outline"
               className="gap-2"
@@ -118,10 +107,7 @@ const Index = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <DataVisualizer data={jsonData} />
-            <DataTable data={jsonData} searchQuery={searchQuery} />
-          </div>
+          <DataVisualizer data={jsonData} />
         )}
       </div>
     </div>
