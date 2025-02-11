@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { format } from "date-fns";
 
 interface DataVisualizerProps {
   data: any;
@@ -31,10 +32,16 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
                       item.angle || 
                       0;
 
+      // Extract timestamp, defaulting to current time if not found
+      const timestamp = item.timestamp || 
+                       item.time || 
+                       Date.now();
+
       return {
-        name: `Record ${index + 1}`,
+        name: format(new Date(timestamp * 1000), 'HH:mm:ss'),
         probability: Number(fallProbability),
-        hipAngle: Number(hipAngle)
+        hipAngle: Number(hipAngle),
+        timestamp // Keep original timestamp for sorting if needed
       };
     });
   }, [data]);
