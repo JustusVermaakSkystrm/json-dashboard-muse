@@ -26,16 +26,34 @@ const Index = () => {
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
-          const parsedData = JSON.parse(e.target.result as string);
+          // Split the file content by newlines and parse each line as JSON
+          const lines = (e.target.result as string)
+            .trim()
+            .split('\n')
+            .filter(line => line.trim() !== '');
+          
+          const parsedData = lines.map(line => {
+            try {
+              return JSON.parse(line);
+            } catch (lineError) {
+              console.error('Error parsing line:', line);
+              return null;
+            }
+          }).filter(item => item !== null);
+
+          if (parsedData.length === 0) {
+            throw new Error("No valid JSON lines found");
+          }
+
           setJsonData(parsedData);
           toast({
             title: "Success",
-            description: "JSON file loaded successfully",
+            description: `JSONL file loaded successfully with ${parsedData.length} records`,
           });
         } catch (error) {
           toast({
             title: "Error",
-            description: "Invalid JSON file",
+            description: "Invalid JSONL file",
             variant: "destructive",
           });
         }
@@ -52,9 +70,9 @@ const Index = () => {
             <Badge className="mb-2 bg-[#E2E8F0] text-gray-600 hover:bg-[#CBD5E1]">
               Dashboard
             </Badge>
-            <h1 className="text-3xl font-semibold text-gray-900">JSON Viewer</h1>
+            <h1 className="text-3xl font-semibold text-gray-900">JSONL Viewer</h1>
             <p className="text-gray-500 mt-1">
-              Upload and visualize your JSON data
+              Upload and visualize your JSONL data
             </p>
           </div>
           <div className="flex gap-4">
@@ -74,12 +92,12 @@ const Index = () => {
               onClick={() => document.getElementById("file-upload").click()}
             >
               <Upload className="h-4 w-4" />
-              Upload JSON
+              Upload JSONL
             </Button>
             <input
               id="file-upload"
               type="file"
-              accept=".json"
+              accept=".jsonl"
               onChange={handleFileUpload}
               className="hidden"
             />
@@ -91,11 +109,11 @@ const Index = () => {
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Upload className="h-12 w-12 text-gray-400 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Upload your JSON file
+                Upload your JSONL file
               </h3>
               <p className="text-gray-500 text-center max-w-md">
-                Drag and drop your JSON file here, or click the upload button above
-                to begin visualizing your data.
+                Drag and drop your JSONL file here, or click the upload button above
+                to begin visualizing your data. Each line should contain a valid JSON object.
               </p>
             </CardContent>
           </Card>
