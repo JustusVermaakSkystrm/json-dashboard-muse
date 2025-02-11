@@ -1,8 +1,8 @@
 
 import { useMemo } from "react";
 import {
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -17,60 +17,54 @@ interface DataVisualizerProps {
 
 const DataVisualizer = ({ data }: DataVisualizerProps) => {
   const chartData = useMemo(() => {
-    if (Array.isArray(data)) {
-      // If data is an array, try to find numeric values to visualize
-      return data.map((item, index) => {
-        const numericValues = Object.entries(item).reduce(
-          (acc: any, [key, value]) => {
-            if (typeof value === "number") {
-              acc[key] = value;
-            }
-            return acc;
-          },
-          { name: `Item ${index + 1}` }
-        );
-        return numericValues;
-      });
-    } else {
-      // If data is an object, create a single entry
-      const numericValues = Object.entries(data).reduce(
-        (acc: any, [key, value]) => {
-          if (typeof value === "number") {
-            acc[key] = value;
-          }
-          return acc;
-        },
-        { name: "Data" }
-      );
-      return [numericValues];
-    }
-  }, [data]);
+    if (!Array.isArray(data)) return [];
 
-  const dataKeys = Object.keys(chartData[0] || {}).filter(
-    (key) => key !== "name"
-  );
+    return data.map((item, index) => {
+      // Extract fall probability, defaulting to 0 if not found
+      const fallProbability = item.fall_probability || 
+                            item.fallProbability || 
+                            item.probability || 
+                            0;
+
+      return {
+        name: `Record ${index + 1}`,
+        probability: Number(fallProbability)
+      };
+    });
+  }, [data]);
 
   return (
     <Card className="bg-white/50 backdrop-blur-sm">
       <CardHeader>
-        <CardTitle className="text-lg font-medium">Data Visualization</CardTitle>
+        <CardTitle className="text-lg font-medium">Fall Probability Over Time</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[400px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData}>
+            <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              {dataKeys.map((key, index) => (
-                <Bar
-                  key={key}
-                  dataKey={key}
-                  fill={`hsl(${(index * 360) / dataKeys.length}, 70%, 50%)`}
-                />
-              ))}
-            </BarChart>
+              <XAxis 
+                dataKey="name"
+                angle={-45}
+                textAnchor="end"
+                height={70}
+              />
+              <YAxis 
+                domain={[0, 1]}
+                tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
+              />
+              <Tooltip 
+                formatter={(value: number) => `${(value * 100).toFixed(1)}%`}
+              />
+              <Line
+                type="monotone"
+                dataKey="probability"
+                stroke="#2563eb"
+                strokeWidth={2}
+                dot={{ fill: "#2563eb" }}
+                name="Fall Probability"
+              />
+            </LineChart>
           </ResponsiveContainer>
         </div>
       </CardContent>
