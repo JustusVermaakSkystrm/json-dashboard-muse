@@ -20,55 +20,94 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
     if (!Array.isArray(data)) return [];
 
     return data.map((item, index) => {
-      // Extract fall probability, defaulting to 0 if not found
+      // Extract fall probability and hip angle, defaulting to 0 if not found
       const fallProbability = item.fall_probability || 
                             item.fallProbability || 
                             item.probability || 
                             0;
+      
+      const hipAngle = item.hip_angle || 
+                      item.hipAngle || 
+                      item.angle || 
+                      0;
 
       return {
         name: `Record ${index + 1}`,
-        probability: Number(fallProbability)
+        probability: Number(fallProbability),
+        hipAngle: Number(hipAngle)
       };
     });
   }, [data]);
 
   return (
-    <Card className="bg-white/50 backdrop-blur-sm">
-      <CardHeader>
-        <CardTitle className="text-lg font-medium">Fall Probability Over Time</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[400px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="name"
-                angle={-45}
-                textAnchor="end"
-                height={70}
-              />
-              <YAxis 
-                domain={[0, 1]}
-                tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
-              />
-              <Tooltip 
-                formatter={(value: number) => `${(value * 100).toFixed(1)}%`}
-              />
-              <Line
-                type="monotone"
-                dataKey="probability"
-                stroke="#2563eb"
-                strokeWidth={2}
-                dot={{ fill: "#2563eb" }}
-                name="Fall Probability"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <Card className="bg-white/50 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="text-lg font-medium">Fall Probability Over Time</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[400px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="name"
+                  angle={-45}
+                  textAnchor="end"
+                  height={70}
+                />
+                <YAxis 
+                  domain={[0, 1]}
+                  tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
+                />
+                <Tooltip 
+                  formatter={(value: number) => `${(value * 100).toFixed(1)}%`}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="probability"
+                  stroke="#2563eb"
+                  strokeWidth={2}
+                  dot={{ fill: "#2563eb" }}
+                  name="Fall Probability"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-white/50 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="text-lg font-medium">Hip Angle Over Time</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[400px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="name"
+                  angle={-45}
+                  textAnchor="end"
+                  height={70}
+                />
+                <YAxis />
+                <Tooltip />
+                <Line
+                  type="monotone"
+                  dataKey="hipAngle"
+                  stroke="#ea580c"
+                  strokeWidth={2}
+                  dot={{ fill: "#ea580c" }}
+                  name="Hip Angle"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
