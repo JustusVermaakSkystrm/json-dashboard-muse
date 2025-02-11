@@ -21,10 +21,10 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
 
     return data.map((item, index) => {
       // Extract fall probability and hip angle, defaulting to 0 if not found
-      const fallProbability = item.fall_probability || 
+      const fallProbability = (item.fall_probability || 
                             item.fallProbability || 
                             item.probability || 
-                            0;
+                            0) / 100; // Divide by 100 here
       
       const hipAngle = item.hip_angle || 
                       item.hipAngle || 
@@ -112,3 +112,4 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
 };
 
 export default DataVisualizer;
+
