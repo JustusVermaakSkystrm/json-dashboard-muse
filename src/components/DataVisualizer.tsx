@@ -73,9 +73,9 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
                 <Line
                   type="monotone"
                   dataKey="probability"
-                  stroke="#2563eb"
+                  stroke="#7829B0"
                   strokeWidth={2}
-                  dot={{ fill: "#2563eb" }}
+                  dot={{ fill: "#7829B0" }}
                   name="Fall Probability"
                 />
               </LineChart>
@@ -104,9 +104,9 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
                 <Line
                   type="monotone"
                   dataKey="hipAngle"
-                  stroke="#ea580c"
+                  stroke="#7829B0"
                   strokeWidth={2}
-                  dot={{ fill: "#ea580c" }}
+                  dot={{ fill: "#7829B0" }}
                   name="Hip Angle"
                 />
               </LineChart>
