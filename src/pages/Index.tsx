@@ -10,12 +10,14 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import DataVisualizer from "@/components/DataVisualizer";
+import DataTable from "@/components/DataTable";
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/lib/firebase";
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 
 const Index = () => {
   const [jsonData, setJsonData] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -26,7 +28,9 @@ const Index = () => {
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const data = querySnapshot.docs.map(doc => ({
         ...doc.data(),
-        id: doc.id
+        id: doc.id,
+        formattedTime: new Date(doc.data().timestamp * 1000).toLocaleString(),
+        fall_probability_percent: `${doc.data().fall_probability.toFixed(2)}%`
       }));
       
       setJsonData(data);
@@ -75,7 +79,20 @@ const Index = () => {
             </CardContent>
           </Card>
         ) : (
-          <DataVisualizer data={jsonData} />
+          <>
+            <DataVisualizer data={jsonData} />
+            <DataTable 
+              data={jsonData.map(item => ({
+                timestamp: item.formattedTime,
+                fall_probability: item.fall_probability_percent,
+                trunk_angle: `${item.trunk_angle.toFixed(2)}°`,
+                hip_angle: `${item.hip_angle.toFixed(2)}°`,
+                sit_probability: `${item.sit_probability.toFixed(2)}%`,
+                stand_probability: `${item.stand_probability.toFixed(2)}%`
+              }))} 
+              searchQuery={searchQuery}
+            />
+          </>
         )}
       </div>
     </div>
