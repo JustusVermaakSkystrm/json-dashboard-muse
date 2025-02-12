@@ -1,65 +1,51 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { Upload, Search, SlidersHorizontal } from "lucide-react";
+import { Upload } from "lucide-react";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import DataVisualizer from "@/components/DataVisualizer";
 import { Badge } from "@/components/ui/badge";
+import { db } from "@/lib/firebase";
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 
 const Index = () => {
   const [jsonData, setJsonData] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
 
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          // Split the file content by newlines and parse each line as JSON
-          const lines = (e.target.result as string)
-            .trim()
-            .split('\n')
-            .filter(line => line.trim() !== '');
-          
-          const parsedData = lines.map(line => {
-            try {
-              return JSON.parse(line);
-            } catch (lineError) {
-              console.error('Error parsing line:', line);
-              return null;
-            }
-          }).filter(item => item !== null);
+  useEffect(() => {
+    // Create a query to fetch data ordered by timestamp
+    const q = query(collection(db, 'fallData'), orderBy('timestamp', 'desc'));
 
-          if (parsedData.length === 0) {
-            throw new Error("No valid JSON lines found");
-          }
+    // Set up real-time listener
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const data = querySnapshot.docs.map(doc => ({
+        ...doc.data(),
+        id: doc.id
+      }));
+      
+      setJsonData(data);
+      toast({
+        title: "Success",
+        description: `Loaded ${data.length} records from Firebase`,
+      });
+    }, (error) => {
+      console.error("Error fetching data:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch data from Firebase",
+        variant: "destructive",
+      });
+    });
 
-          setJsonData(parsedData);
-          toast({
-            title: "Success",
-            description: `JSONL file loaded successfully with ${parsedData.length} records`,
-          });
-        } catch (error) {
-          toast({
-            title: "Error",
-            description: "Invalid JSONL file",
-            variant: "destructive",
-          });
-        }
-      };
-      reader.readAsText(file);
-    }
-  };
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, [toast]);
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-6 space-y-6 transition-all duration-300">
@@ -69,27 +55,10 @@ const Index = () => {
             <Badge className="mb-2 bg-[#E2E8F0] text-gray-600 hover:bg-[#CBD5E1]">
               Dashboard
             </Badge>
-            <h1 className="text-3xl font-semibold text-gray-900">JSONL Viewer</h1>
+            <h1 className="text-3xl font-semibold text-gray-900">Fall Detection Monitor</h1>
             <p className="text-gray-500 mt-1">
-              Upload and visualize your JSONL data
+              Real-time fall detection data visualization
             </p>
-          </div>
-          <div className="flex gap-4">
-            <Button
-              variant="outline"
-              className="gap-2"
-              onClick={() => document.getElementById("file-upload").click()}
-            >
-              <Upload className="h-4 w-4" />
-              Upload JSONL
-            </Button>
-            <input
-              id="file-upload"
-              type="file"
-              accept=".jsonl"
-              onChange={handleFileUpload}
-              className="hidden"
-            />
           </div>
         </div>
 
@@ -98,11 +67,10 @@ const Index = () => {
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Upload className="h-12 w-12 text-gray-400 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Upload your JSONL file
+                Loading Data...
               </h3>
               <p className="text-gray-500 text-center max-w-md">
-                Drag and drop your JSONL file here, or click the upload button above
-                to begin visualizing your data. Each line should contain a valid JSON object.
+                Connecting to Firebase and fetching real-time fall detection data.
               </p>
             </CardContent>
           </Card>
