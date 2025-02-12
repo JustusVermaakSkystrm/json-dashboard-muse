@@ -13,7 +13,7 @@ import DataVisualizer from "@/components/DataVisualizer";
 import DataTable from "@/components/DataTable";
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/lib/firebase";
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, getDocs } from 'firebase/firestore';
 
 const Index = () => {
   const [jsonData, setJsonData] = useState(null);
@@ -21,25 +21,47 @@ const Index = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log("Starting Firebase data fetch...");
+    
     // Create a query to fetch data ordered by timestamp
     const q = query(collection(db, 'fallData'), orderBy('timestamp', 'desc'));
 
+    // First, let's check if we can get any data
+    getDocs(q).then((snapshot) => {
+      console.log("Initial data check:", snapshot.size, "documents found");
+      console.log("Collection exists:", !snapshot.empty);
+      if (!snapshot.empty) {
+        console.log("Sample doc:", snapshot.docs[0].data());
+      }
+    }).catch(error => {
+      console.error("Error checking collection:", error);
+    });
+
     // Set up real-time listener
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const data = querySnapshot.docs.map(doc => ({
-        ...doc.data(),
-        id: doc.id,
-        formattedTime: new Date(doc.data().timestamp * 1000).toLocaleString(),
-        fall_probability_percent: `${doc.data().fall_probability.toFixed(2)}%`
-      }));
+      console.log("Snapshot received, document count:", querySnapshot.size);
       
+      const data = querySnapshot.docs.map(doc => {
+        const docData = doc.data();
+        console.log("Processing document:", doc.id, docData);
+        
+        return {
+          ...docData,
+          id: doc.id,
+          formattedTime: new Date(docData.timestamp * 1000).toLocaleString(),
+          fall_probability_percent: `${(docData.fall_probability || 0).toFixed(2)}%`
+        };
+      });
+      
+      console.log("Processed data:", data);
       setJsonData(data);
+      
       toast({
         title: "Success",
         description: `Loaded ${data.length} records from Firebase`,
       });
     }, (error) => {
-      console.error("Error fetching data:", error);
+      console.error("Detailed error fetching data:", error);
       toast({
         title: "Error",
         description: "Failed to fetch data from Firebase",
@@ -75,6 +97,7 @@ const Index = () => {
               </h3>
               <p className="text-gray-500 text-center max-w-md">
                 Connecting to Firebase and fetching real-time fall detection data.
+                Check console for connection status.
               </p>
             </CardContent>
           </Card>
@@ -85,10 +108,10 @@ const Index = () => {
               data={jsonData.map(item => ({
                 timestamp: item.formattedTime,
                 fall_probability: item.fall_probability_percent,
-                trunk_angle: `${item.trunk_angle.toFixed(2)}°`,
-                hip_angle: `${item.hip_angle.toFixed(2)}°`,
-                sit_probability: `${item.sit_probability.toFixed(2)}%`,
-                stand_probability: `${item.stand_probability.toFixed(2)}%`
+                trunk_angle: `${(item.trunk_angle || 0).toFixed(2)}°`,
+                hip_angle: `${(item.hip_angle || 0).toFixed(2)}°`,
+                sit_probability: `${(item.sit_probability || 0).toFixed(2)}%`,
+                stand_probability: `${(item.stand_probability || 0).toFixed(2)}%`
               }))} 
               searchQuery={searchQuery}
             />
