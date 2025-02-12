@@ -12,8 +12,12 @@ import { Button } from "@/components/ui/button";
 import DataVisualizer from "@/components/DataVisualizer";
 import DataTable from "@/components/DataTable";
 import { Badge } from "@/components/ui/badge";
-import { db } from "@/lib/firebase";
-import { collection, onSnapshot, query, orderBy, getDocs } from 'firebase/firestore';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  'https://feb-38d20.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZlYi0zOGQyMCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzEwMDg0OTg4LCJleHAiOjIwMjU2NjA5ODh9.8HBJ4I5QRgSK6JOuUvTR-qcaAYnGIiEDRNLkM6ybPw4'
+);
 
 const Index = () => {
   const [jsonData, setJsonData] = useState(null);
@@ -21,57 +25,68 @@ const Index = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    console.log("Starting Firebase data fetch...");
+    console.log("Starting Supabase data fetch...");
     
-    // Create a query to fetch data ordered by timestamp
-    const q = query(collection(db, 'fallData'), orderBy('timestamp', 'desc'));
+    // Set up real-time listener for fall data
+    const channel = supabase
+      .channel('fall_data_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'fall_data'
+        },
+        (payload) => {
+          console.log('Change received!', payload);
+          fetchData(); // Refresh data when changes occur
+        }
+      )
+      .subscribe();
 
-    // First, let's check if we can get any data
-    getDocs(q).then((snapshot) => {
-      console.log("Initial data check:", snapshot.size, "documents found");
-      console.log("Collection exists:", !snapshot.empty);
-      if (!snapshot.empty) {
-        console.log("Sample doc:", snapshot.docs[0].data());
+    // Initial data fetch
+    fetchData();
+
+    // Cleanup subscription
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [toast]);
+
+  const fetchData = async () => {
+    try {
+      console.log("Fetching data from Supabase...");
+      const { data, error } = await supabase
+        .from('fall_data')
+        .select('*')
+        .order('timestamp', { ascending: false });
+
+      if (error) {
+        throw error;
       }
-    }).catch(error => {
-      console.error("Error checking collection:", error);
-    });
 
-    // Set up real-time listener
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      console.log("Snapshot received, document count:", querySnapshot.size);
-      
-      const data = querySnapshot.docs.map(doc => {
-        const docData = doc.data();
-        console.log("Processing document:", doc.id, docData);
-        
-        return {
-          ...docData,
-          id: doc.id,
-          formattedTime: new Date(docData.timestamp * 1000).toLocaleString(),
-          fall_probability_percent: `${(docData.fall_probability || 0).toFixed(2)}%`
-        };
-      });
-      
-      console.log("Processed data:", data);
-      setJsonData(data);
-      
+      console.log("Received data:", data);
+
+      const formattedData = data.map(item => ({
+        ...item,
+        formattedTime: new Date(item.timestamp * 1000).toLocaleString(),
+        fall_probability_percent: `${(item.fall_probability || 0).toFixed(2)}%`
+      }));
+
+      setJsonData(formattedData);
       toast({
         title: "Success",
-        description: `Loaded ${data.length} records from Firebase`,
+        description: `Loaded ${formattedData.length} records from database`,
       });
-    }, (error) => {
-      console.error("Detailed error fetching data:", error);
+    } catch (error) {
+      console.error("Error fetching data:", error);
       toast({
         title: "Error",
-        description: "Failed to fetch data from Firebase",
+        description: "Failed to fetch data from database",
         variant: "destructive",
       });
-    });
-
-    // Cleanup subscription on unmount
-    return () => unsubscribe();
-  }, [toast]);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-6 space-y-6 transition-all duration-300">
@@ -96,7 +111,7 @@ const Index = () => {
                 Loading Data...
               </h3>
               <p className="text-gray-500 text-center max-w-md">
-                Connecting to Firebase and fetching real-time fall detection data.
+                Connecting to database and fetching real-time fall detection data.
                 Check console for connection status.
               </p>
             </CardContent>
