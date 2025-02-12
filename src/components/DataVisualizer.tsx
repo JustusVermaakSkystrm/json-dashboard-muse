@@ -12,36 +12,41 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 
+interface DataPoint {
+  timestamp: number;
+  com: { x: number; y: number };
+  velocity: { x: number; y: number };
+  acceleration: { x: number; y: number };
+  trunk_angle: number;
+  fall_probability: number;
+  hip_angle: number;
+  sit_probability: number;
+  stand_probability: number;
+  landmarks: any[];
+}
+
 interface DataVisualizerProps {
-  data: any;
+  data: DataPoint[];
 }
 
 const DataVisualizer = ({ data }: DataVisualizerProps) => {
   const chartData = useMemo(() => {
     if (!Array.isArray(data)) return [];
 
-    return data.map((item, index) => {
-      // Extract fall probability and hip angle, defaulting to 0 if not found
-      const fallProbability = (item.fall_probability || 
-                            item.fallProbability || 
-                            item.probability || 
-                            0) / 100; // Divide by 100 here
-      
-      const hipAngle = item.hip_angle || 
-                      item.hipAngle || 
-                      item.angle || 
-                      0;
-
-      // Extract timestamp, defaulting to current time if not found
-      const timestamp = item.timestamp || 
-                       item.time || 
-                       Date.now();
+    return data.map((item) => {
+      // Ensure we're using the exact field names from the Python script
+      const fallProbability = item.fall_probability / 100; // Convert to decimal
+      const hipAngle = item.hip_angle;
+      const timestamp = item.timestamp;
 
       return {
         name: format(new Date(timestamp * 1000), 'HH:mm:ss'),
         probability: Number(fallProbability),
         hipAngle: Number(hipAngle),
-        timestamp // Keep original timestamp for sorting if needed
+        trunkAngle: Number(item.trunk_angle),
+        sitProbability: Number(item.sit_probability) / 100,
+        standProbability: Number(item.stand_probability) / 100,
+        timestamp
       };
     });
   }, [data]);
@@ -119,4 +124,3 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
 };
 
 export default DataVisualizer;
-
