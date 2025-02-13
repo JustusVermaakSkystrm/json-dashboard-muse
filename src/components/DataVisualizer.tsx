@@ -38,8 +38,8 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
       .sort((a, b) => a.timestamp - b.timestamp)
       .map((item) => {
         const fallProbability = item.fall_probability / 100;
-        const sitProbability = item.sit_probability;  // Remove division by 100
-        const standProbability = item.stand_probability;  // Remove division by 100
+        const sitProbability = item.sit_probability;  // Already between 0-1
+        const standProbability = item.stand_probability;  // Already between 0-1
         const timestamp = item.timestamp;
 
         return {
@@ -154,11 +154,11 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
                   height={70}
                 />
                 <YAxis 
-                  domain={[0, 100]}
-                  tickFormatter={(value) => `${value.toFixed(0)}%`}
+                  domain={[0, 1]}
+                  tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
                 />
                 <Tooltip 
-                  formatter={(value: number) => `${value.toFixed(1)}%`}
+                  formatter={(value: number) => `${(value * 100).toFixed(1)}%`}
                 />
                 <Legend />
                 <Line
@@ -199,11 +199,11 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
                   height={70}
                 />
                 <YAxis 
-                  domain={[0, 100]}
-                  tickFormatter={(value) => `${value.toFixed(0)}%`}
+                  domain={[0, 1]}
+                  tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
                 />
                 <Tooltip 
-                  formatter={(value: number) => `${value.toFixed(1)}%`}
+                  formatter={(value: number) => `${(value * 100).toFixed(1)}%`}
                 />
                 <Legend />
                 <Line
