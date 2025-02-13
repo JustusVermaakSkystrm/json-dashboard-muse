@@ -42,10 +42,6 @@ const Index = () => {
 
         console.log("Processed data:", data);
         setJsonData(data);
-        toast({
-          title: "Success",
-          description: `Loaded ${data.length} records from database`,
-        });
       } catch (error) {
         console.error("Error processing Firebase data:", error);
         toast({
