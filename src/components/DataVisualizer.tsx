@@ -34,20 +34,22 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
   const chartData = useMemo(() => {
     if (!Array.isArray(data)) return [];
 
-    return [...data].reverse().map((item) => {
-      const fallProbability = item.fall_probability / 100;
-      const sitProbability = item.sit_probability;  // Remove division by 100
-      const standProbability = item.stand_probability;  // Remove division by 100
-      const timestamp = item.timestamp;
+    return [...data]
+      .sort((a, b) => a.timestamp - b.timestamp)
+      .map((item) => {
+        const fallProbability = item.fall_probability / 100;
+        const sitProbability = item.sit_probability;  // Remove division by 100
+        const standProbability = item.stand_probability;  // Remove division by 100
+        const timestamp = item.timestamp;
 
-      return {
-        name: format(new Date(timestamp * 1000), 'HH:mm:ss'),
-        probability: Number(fallProbability),
-        sitProbability: Number(sitProbability),
-        standProbability: Number(standProbability),
-        timestamp: new Date(timestamp * 1000)
-      };
-    });
+        return {
+          name: format(new Date(timestamp * 1000), 'HH:mm:ss'),
+          probability: Number(fallProbability),
+          sitProbability: Number(sitProbability),
+          standProbability: Number(standProbability),
+          timestamp: new Date(timestamp * 1000)
+        };
+      });
   }, [data]);
 
   const last24HoursData = useMemo(() => {
