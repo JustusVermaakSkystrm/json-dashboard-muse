@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { format } from "date-fns";
+import { format, subHours } from "date-fns";
 
 interface DataPoint {
   timestamp: number;
@@ -34,33 +34,41 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
     if (!Array.isArray(data)) return [];
 
     return data.map((item) => {
-      // Ensure we're using the exact field names from the Python script
-      const fallProbability = item.fall_probability / 100; // Convert to decimal
-      const hipAngle = item.hip_angle;
+      const fallProbability = item.fall_probability / 100;
+      const sitProbability = item.sit_probability / 100;
+      const standProbability = item.stand_probability / 100;
       const timestamp = item.timestamp;
 
       return {
         name: format(new Date(timestamp * 1000), 'HH:mm:ss'),
         probability: Number(fallProbability),
-        hipAngle: Number(hipAngle),
-        trunkAngle: Number(item.trunk_angle),
-        sitProbability: Number(item.sit_probability) / 100,
-        standProbability: Number(item.stand_probability) / 100,
-        timestamp
+        sitProbability: Number(sitProbability),
+        standProbability: Number(standProbability),
+        timestamp: new Date(timestamp * 1000)
       };
     });
   }, [data]);
+
+  const last24HoursData = useMemo(() => {
+    const cutoffTime = subHours(new Date(), 24);
+    return chartData.filter(item => item.timestamp > cutoffTime);
+  }, [chartData]);
+
+  const lastHourData = useMemo(() => {
+    const cutoffTime = subHours(new Date(), 1);
+    return chartData.filter(item => item.timestamp > cutoffTime);
+  }, [chartData]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <Card className="bg-white/50 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle className="text-lg font-medium">Fall Probability Over Time</CardTitle>
+          <CardTitle className="text-lg font-medium">Fall Probability (24 Hours)</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[400px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
+              <LineChart data={last24HoursData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis 
                   dataKey="name"
@@ -80,7 +88,7 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
                   dataKey="probability"
                   stroke="#7829B0"
                   strokeWidth={2}
-                  dot={{ fill: "#7829B0" }}
+                  dot={false}
                   name="Fall Probability"
                 />
               </LineChart>
@@ -91,12 +99,12 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
 
       <Card className="bg-white/50 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle className="text-lg font-medium">Hip Angle Over Time</CardTitle>
+          <CardTitle className="text-lg font-medium">Fall Probability (Last Hour)</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[400px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
+              <LineChart data={lastHourData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis 
                   dataKey="name"
@@ -104,15 +112,108 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
                   textAnchor="end"
                   height={70}
                 />
-                <YAxis />
-                <Tooltip />
+                <YAxis 
+                  domain={[0, 1]}
+                  tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
+                />
+                <Tooltip 
+                  formatter={(value: number) => `${(value * 100).toFixed(1)}%`}
+                />
                 <Line
                   type="monotone"
-                  dataKey="hipAngle"
+                  dataKey="probability"
                   stroke="#7829B0"
                   strokeWidth={2}
-                  dot={{ fill: "#7829B0" }}
-                  name="Hip Angle"
+                  dot={false}
+                  name="Fall Probability"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-white/50 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="text-lg font-medium">Sit/Stand Probability (24 Hours)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[400px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={last24HoursData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="name"
+                  angle={-45}
+                  textAnchor="end"
+                  height={70}
+                />
+                <YAxis 
+                  domain={[0, 1]}
+                  tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
+                />
+                <Tooltip 
+                  formatter={(value: number) => `${(value * 100).toFixed(1)}%`}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="sitProbability"
+                  stroke="#FF6B6B"
+                  strokeWidth={2}
+                  dot={false}
+                  name="Sit Probability"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="standProbability"
+                  stroke="#4ECDC4"
+                  strokeWidth={2}
+                  dot={false}
+                  name="Stand Probability"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-white/50 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="text-lg font-medium">Sit/Stand Probability (Last Hour)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[400px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={lastHourData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="name"
+                  angle={-45}
+                  textAnchor="end"
+                  height={70}
+                />
+                <YAxis 
+                  domain={[0, 1]}
+                  tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
+                />
+                <Tooltip 
+                  formatter={(value: number) => `${(value * 100).toFixed(1)}%`}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="sitProbability"
+                  stroke="#FF6B6B"
+                  strokeWidth={2}
+                  dot={false}
+                  name="Sit Probability"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="standProbability"
+                  stroke="#4ECDC4"
+                  strokeWidth={2}
+                  dot={false}
+                  name="Stand Probability"
                 />
               </LineChart>
             </ResponsiveContainer>
