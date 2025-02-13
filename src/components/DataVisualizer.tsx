@@ -8,6 +8,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Legend,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format, subHours } from "date-fns";
@@ -35,8 +36,8 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
 
     return data.map((item) => {
       const fallProbability = item.fall_probability / 100;
-      const sitProbability = item.sit_probability / 100;
-      const standProbability = item.stand_probability / 100;
+      const sitProbability = item.sit_probability;  // Remove division by 100
+      const standProbability = item.stand_probability;  // Remove division by 100
       const timestamp = item.timestamp;
 
       return {
@@ -83,6 +84,7 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
                 <Tooltip 
                   formatter={(value: number) => `${(value * 100).toFixed(1)}%`}
                 />
+                <Legend />
                 <Line
                   type="monotone"
                   dataKey="probability"
@@ -119,6 +121,7 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
                 <Tooltip 
                   formatter={(value: number) => `${(value * 100).toFixed(1)}%`}
                 />
+                <Legend />
                 <Line
                   type="monotone"
                   dataKey="probability"
@@ -149,19 +152,20 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
                   height={70}
                 />
                 <YAxis 
-                  domain={[0, 1]}
-                  tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
+                  domain={[0, 100]}
+                  tickFormatter={(value) => `${value.toFixed(0)}%`}
                 />
                 <Tooltip 
-                  formatter={(value: number) => `${(value * 100).toFixed(1)}%`}
+                  formatter={(value: number) => `${value.toFixed(1)}%`}
                 />
+                <Legend />
                 <Line
                   type="monotone"
                   dataKey="sitProbability"
                   stroke="#FF6B6B"
                   strokeWidth={2}
                   dot={false}
-                  name="Sit Probability"
+                  name="Sitting"
                 />
                 <Line
                   type="monotone"
@@ -169,7 +173,7 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
                   stroke="#4ECDC4"
                   strokeWidth={2}
                   dot={false}
-                  name="Stand Probability"
+                  name="Standing"
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -193,19 +197,20 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
                   height={70}
                 />
                 <YAxis 
-                  domain={[0, 1]}
-                  tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
+                  domain={[0, 100]}
+                  tickFormatter={(value) => `${value.toFixed(0)}%`}
                 />
                 <Tooltip 
-                  formatter={(value: number) => `${(value * 100).toFixed(1)}%`}
+                  formatter={(value: number) => `${value.toFixed(1)}%`}
                 />
+                <Legend />
                 <Line
                   type="monotone"
                   dataKey="sitProbability"
                   stroke="#FF6B6B"
                   strokeWidth={2}
                   dot={false}
-                  name="Sit Probability"
+                  name="Sitting"
                 />
                 <Line
                   type="monotone"
@@ -213,7 +218,7 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
                   stroke="#4ECDC4"
                   strokeWidth={2}
                   dot={false}
-                  name="Stand Probability"
+                  name="Standing"
                 />
               </LineChart>
             </ResponsiveContainer>
