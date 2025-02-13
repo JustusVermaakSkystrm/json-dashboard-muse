@@ -9,13 +9,27 @@ interface DataVisualizerProps {
   data: DataPoint[];
 }
 
+const calculateMovingAverage = (data: any[], periods: number, key: string) => {
+  return data.map((item, index) => {
+    const start = Math.max(0, index - periods + 1);
+    const values = data.slice(start, index + 1).map(d => d[key]);
+    const sum = values.reduce((acc, val) => acc + val, 0);
+    const average = values.length > 0 ? sum / values.length : 0;
+    return {
+      ...item,
+      [key]: average
+    };
+  });
+};
+
 const DataVisualizer = ({ data }: DataVisualizerProps) => {
   const chartData = useMemo(() => {
     if (!Array.isArray(data)) return [];
 
-    return [...data]
-      .sort((a, b) => b.timestamp - a.timestamp) // Sort descending (newest first)
-      .reverse() // Reverse to get ascending order (oldest first)
+    // First, create the base data points
+    const baseData = [...data]
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .reverse()
       .map((item) => {
         const fallProbability = item.fall_probability / 100;
         const positionValue = item.stand_probability;
@@ -28,6 +42,13 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
           timestamp: new Date(timestamp * 1000)
         };
       });
+
+    // Apply moving averages
+    return calculateMovingAverage(
+      calculateMovingAverage(baseData, 20, 'probability'),
+      20,
+      'position'
+    );
   }, [data]);
 
   const last24HoursData = useMemo(() => {
