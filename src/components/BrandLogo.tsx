@@ -11,7 +11,7 @@ const BrandLogo = () => {
           className="w-full h-full object-contain"
         />
       </div>
-      <div className="absolute inset-0 mix-blend-overlay">
+      <div className="absolute inset-0 mix-blend-overlay opacity-50">
         <img 
           src="/lovable-uploads/7c166ebf-5f68-4e6d-bbae-aa49fbfe10cd.png" 
           alt="Gradient circle 2"
