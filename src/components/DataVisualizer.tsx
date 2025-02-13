@@ -34,7 +34,7 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
   const chartData = useMemo(() => {
     if (!Array.isArray(data)) return [];
 
-    return data.map((item) => {
+    return [...data].reverse().map((item) => {
       const fallProbability = item.fall_probability / 100;
       const sitProbability = item.sit_probability;  // Remove division by 100
       const standProbability = item.stand_probability;  // Remove division by 100
