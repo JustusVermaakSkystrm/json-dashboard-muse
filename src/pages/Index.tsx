@@ -14,6 +14,7 @@ import DataTable from "@/components/DataTable";
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/lib/firebase";
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import BrandLogo from "@/components/BrandLogo";
 
 const Index = () => {
   const [jsonData, setJsonData] = useState(null);
@@ -70,14 +71,17 @@ const Index = () => {
     <div className="min-h-screen bg-[#F8FAFC] p-6 space-y-6 transition-all duration-300">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
-          <div>
-            <Badge className="mb-2 bg-[#E2E8F0] text-gray-600 hover:bg-[#CBD5E1]">
-              Dashboard
-            </Badge>
-            <h1 className="text-3xl font-semibold text-gray-900">Fall Detection Monitor</h1>
-            <p className="text-gray-500 mt-1">
-              Real-time fall detection data visualization
-            </p>
+          <div className="flex items-center gap-4">
+            <BrandLogo />
+            <div>
+              <Badge className="mb-2 bg-[#E2E8F0] text-gray-600 hover:bg-[#CBD5E1]">
+                Dashboard
+              </Badge>
+              <h1 className="text-3xl font-semibold text-gray-900">Fall Detection Monitor</h1>
+              <p className="text-gray-500 mt-1">
+                Real-time fall detection data visualization
+              </p>
+            </div>
           </div>
         </div>
 
