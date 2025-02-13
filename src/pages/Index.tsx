@@ -12,12 +12,8 @@ import { Button } from "@/components/ui/button";
 import DataVisualizer from "@/components/DataVisualizer";
 import DataTable from "@/components/DataTable";
 import { Badge } from "@/components/ui/badge";
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  'https://feb-38d20.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZlYi0zOGQyMCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzEwMDg0OTg4LCJleHAiOjIwMjU2NjA5ODh9.8HBJ4I5QRgSK6JOuUvTR-qcaAYnGIiEDRNLkM6ybPw4'
-);
+import { db } from "@/lib/firebase";
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 
 const Index = () => {
   const [jsonData, setJsonData] = useState(null);
@@ -25,68 +21,50 @@ const Index = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    console.log("Starting Supabase data fetch...");
+    console.log("Starting Firebase data fetch...");
     
     // Set up real-time listener for fall data
-    const channel = supabase
-      .channel('fall_data_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'fall_data'
-        },
-        (payload) => {
-          console.log('Change received!', payload);
-          fetchData(); // Refresh data when changes occur
-        }
-      )
-      .subscribe();
+    const q = query(
+      collection(db, 'fallData'),
+      orderBy('timestamp', 'desc')
+    );
 
-    // Initial data fetch
-    fetchData();
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      try {
+        console.log("Received Firebase update");
+        const data = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          formattedTime: new Date(doc.data().timestamp * 1000).toLocaleString(),
+          fall_probability_percent: `${(doc.data().fall_probability || 0).toFixed(2)}%`
+        }));
 
-    // Cleanup subscription
-    return () => {
-      channel.unsubscribe();
-    };
-  }, [toast]);
-
-  const fetchData = async () => {
-    try {
-      console.log("Fetching data from Supabase...");
-      const { data, error } = await supabase
-        .from('fall_data')
-        .select('*')
-        .order('timestamp', { ascending: false });
-
-      if (error) {
-        throw error;
+        console.log("Processed data:", data);
+        setJsonData(data);
+        toast({
+          title: "Success",
+          description: `Loaded ${data.length} records from database`,
+        });
+      } catch (error) {
+        console.error("Error processing Firebase data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to process database update",
+          variant: "destructive",
+        });
       }
-
-      console.log("Received data:", data);
-
-      const formattedData = data.map(item => ({
-        ...item,
-        formattedTime: new Date(item.timestamp * 1000).toLocaleString(),
-        fall_probability_percent: `${(item.fall_probability || 0).toFixed(2)}%`
-      }));
-
-      setJsonData(formattedData);
-      toast({
-        title: "Success",
-        description: `Loaded ${formattedData.length} records from database`,
-      });
-    } catch (error) {
-      console.error("Error fetching data:", error);
+    }, (error) => {
+      console.error("Firebase subscription error:", error);
       toast({
         title: "Error",
-        description: "Failed to fetch data from database",
+        description: "Failed to connect to database",
         variant: "destructive",
       });
-    }
-  };
+    });
+
+    // Cleanup subscription
+    return () => unsubscribe();
+  }, [toast]);
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-6 space-y-6 transition-all duration-300">
