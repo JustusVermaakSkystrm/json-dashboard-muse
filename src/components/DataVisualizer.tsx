@@ -45,8 +45,8 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
 
     // Apply moving averages
     return calculateMovingAverage(
-      calculateMovingAverage(baseData, 20, 'probability'),
-      20,
+      calculateMovingAverage(baseData, 10, 'probability'),
+      10,
       'position'
     );
   }, [data]);
