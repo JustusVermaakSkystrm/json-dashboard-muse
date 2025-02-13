@@ -1,4 +1,3 @@
-
 import { useMemo } from "react";
 import {
   LineChart,
@@ -38,15 +37,13 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
       .sort((a, b) => a.timestamp - b.timestamp)
       .map((item) => {
         const fallProbability = item.fall_probability / 100;
-        const sitProbability = item.sit_probability;  // Already between 0-1
-        const standProbability = item.stand_probability;  // Already between 0-1
+        const positionValue = item.stand_probability; // Use stand probability (1 = standing, 0 = sitting)
         const timestamp = item.timestamp;
 
         return {
           name: format(new Date(timestamp * 1000), 'HH:mm:ss'),
           probability: Number(fallProbability),
-          sitProbability: Number(sitProbability),
-          standProbability: Number(standProbability),
+          position: Number(positionValue),
           timestamp: new Date(timestamp * 1000)
         };
       });
@@ -140,7 +137,7 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
 
       <Card className="bg-white/50 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle className="text-lg font-medium">Sit/Stand Probability (24 Hours)</CardTitle>
+          <CardTitle className="text-lg font-medium">Position (24 Hours)</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[400px] w-full">
@@ -155,27 +152,21 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
                 />
                 <YAxis 
                   domain={[0, 1]}
-                  tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
+                  ticks={[0, 1]}
+                  tickFormatter={(value) => value === 1 ? 'Standing' : 'Sitting'}
                 />
                 <Tooltip 
-                  formatter={(value: number) => `${(value * 100).toFixed(1)}%`}
+                  formatter={(value: number) => value === 1 ? 'Standing' : 'Sitting'}
+                  labelFormatter={(label) => `Time: ${label}`}
                 />
                 <Legend />
                 <Line
                   type="monotone"
-                  dataKey="sitProbability"
-                  stroke="#FF6B6B"
+                  dataKey="position"
+                  stroke="#7829B0"
                   strokeWidth={2}
                   dot={false}
-                  name="Sitting"
-                />
-                <Line
-                  type="monotone"
-                  dataKey="standProbability"
-                  stroke="#4ECDC4"
-                  strokeWidth={2}
-                  dot={false}
-                  name="Standing"
+                  name="Position"
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -185,7 +176,7 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
 
       <Card className="bg-white/50 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle className="text-lg font-medium">Sit/Stand Probability (Last Hour)</CardTitle>
+          <CardTitle className="text-lg font-medium">Position (Last Hour)</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[400px] w-full">
@@ -200,27 +191,21 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
                 />
                 <YAxis 
                   domain={[0, 1]}
-                  tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
+                  ticks={[0, 1]}
+                  tickFormatter={(value) => value === 1 ? 'Standing' : 'Sitting'}
                 />
                 <Tooltip 
-                  formatter={(value: number) => `${(value * 100).toFixed(1)}%`}
+                  formatter={(value: number) => value === 1 ? 'Standing' : 'Sitting'}
+                  labelFormatter={(label) => `Time: ${label}`}
                 />
                 <Legend />
                 <Line
                   type="monotone"
-                  dataKey="sitProbability"
-                  stroke="#FF6B6B"
+                  dataKey="position"
+                  stroke="#7829B0"
                   strokeWidth={2}
                   dot={false}
-                  name="Sitting"
-                />
-                <Line
-                  type="monotone"
-                  dataKey="standProbability"
-                  stroke="#4ECDC4"
-                  strokeWidth={2}
-                  dot={false}
-                  name="Standing"
+                  name="Position"
                 />
               </LineChart>
             </ResponsiveContainer>
