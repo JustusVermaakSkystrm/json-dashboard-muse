@@ -68,7 +68,7 @@ const Index = () => {
   }, [toast]);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-6 space-y-6 transition-all duration-300">
+    <div className="min-h-screen bg-black p-6 space-y-6 transition-all duration-300">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -77,8 +77,8 @@ const Index = () => {
               <Badge className="mb-2 bg-[#E2E8F0] text-gray-600 hover:bg-[#CBD5E1]">
                 Dashboard
               </Badge>
-              <h1 className="text-3xl font-semibold text-gray-900">Fall Detection Monitor</h1>
-              <p className="text-gray-500 mt-1">
+              <h1 className="text-3xl font-semibold text-white">Fall Detection Monitor</h1>
+              <p className="text-gray-400 mt-1">
                 Real-time fall detection data visualization
               </p>
             </div>
@@ -86,13 +86,13 @@ const Index = () => {
         </div>
 
         {!jsonData ? (
-          <Card className="border-dashed border-2 bg-white/50 backdrop-blur-sm">
+          <Card className="border-dashed border-2 bg-white/5 backdrop-blur-sm">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Upload className="h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <h3 className="text-lg font-medium text-white mb-2">
                 Loading Data...
               </h3>
-              <p className="text-gray-500 text-center max-w-md">
+              <p className="text-gray-400 text-center max-w-md">
                 Connecting to database and fetching real-time fall detection data.
                 Check console for connection status.
               </p>
