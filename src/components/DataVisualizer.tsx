@@ -1,3 +1,4 @@
+
 import { useMemo } from "react";
 import {
   LineChart,
@@ -34,10 +35,11 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
     if (!Array.isArray(data)) return [];
 
     return [...data]
-      .sort((a, b) => a.timestamp - b.timestamp)
+      .sort((a, b) => b.timestamp - a.timestamp) // Sort descending (newest first)
+      .reverse() // Reverse to get ascending order (oldest first)
       .map((item) => {
         const fallProbability = item.fall_probability / 100;
-        const positionValue = item.stand_probability; // Use stand probability (1 = standing, 0 = sitting)
+        const positionValue = item.stand_probability;
         const timestamp = item.timestamp;
 
         return {
