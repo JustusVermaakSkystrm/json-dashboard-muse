@@ -66,7 +66,7 @@ const Index = () => {
   return (
     <div className="min-h-screen p-6 space-y-6 transition-all duration-300" 
          style={{
-           background: 'linear-gradient(to bottom right, #FF800A, #7829B0)'
+           background: 'linear-gradient(to right, #FF800A, #7829B0)'
          }}>
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
