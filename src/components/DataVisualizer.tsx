@@ -4,6 +4,7 @@ import { format, subHours } from "date-fns";
 import { DataPoint } from "@/types/chart";
 import FallProbabilityChart from "./charts/FallProbabilityChart";
 import PositionChart from "./charts/PositionChart";
+import GaugeChart from "./charts/GaugeChart";
 
 interface DataVisualizerProps {
   data: DataPoint[];
@@ -43,37 +44,42 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
         };
       });
 
-    // Apply moving averages
+    // Apply moving averages with 10 period window
     return calculateMovingAverage(
-      calculateMovingAverage(baseData, 5, 'probability'),
-      5,
+      calculateMovingAverage(baseData, 10, 'probability'),
+      10,
       'position'
     );
   }, [data]);
-
-  const last24HoursData = useMemo(() => {
-    const cutoffTime = subHours(new Date(), 24);
-    return chartData.filter(item => item.timestamp > cutoffTime);
-  }, [chartData]);
 
   const lastHourData = useMemo(() => {
     const cutoffTime = subHours(new Date(), 1);
     return chartData.filter(item => item.timestamp > cutoffTime);
   }, [chartData]);
 
+  // Calculate current values (last value from 10-period moving average)
+  const currentValues = useMemo(() => {
+    if (chartData.length === 0) return { probability: 0, position: 0 };
+    const latest = chartData[chartData.length - 1];
+    return {
+      probability: latest.probability,
+      position: latest.position
+    };
+  }, [chartData]);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <FallProbabilityChart 
-        data={last24HoursData} 
-        title="Fall Probability (24 Hours)" 
+      <GaugeChart 
+        value={currentValues.probability}
+        title="Current Fall Probability (10-period MA)" 
+      />
+      <GaugeChart 
+        value={currentValues.position}
+        title="Current Position (10-period MA)" 
       />
       <FallProbabilityChart 
         data={lastHourData} 
         title="Fall Probability (Last Hour)" 
-      />
-      <PositionChart 
-        data={last24HoursData} 
-        title="Position (24 Hours)" 
       />
       <PositionChart 
         data={lastHourData} 
