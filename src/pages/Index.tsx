@@ -64,7 +64,10 @@ const Index = () => {
   }, [toast]);
 
   return (
-    <div className="min-h-screen bg-black p-6 space-y-6 transition-all duration-300">
+    <div className="min-h-screen p-6 space-y-6 transition-all duration-300" 
+         style={{
+           background: 'linear-gradient(to bottom right, #FF800A, #7829B0)'
+         }}>
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -74,7 +77,7 @@ const Index = () => {
                 Dashboard
               </Badge>
               <h1 className="text-3xl font-semibold text-white">Fall Detection Monitor</h1>
-              <p className="text-gray-400 mt-1">
+              <p className="text-gray-200 mt-1">
                 Real-time fall detection data visualization
               </p>
             </div>
@@ -88,7 +91,7 @@ const Index = () => {
               <h3 className="text-lg font-medium text-white mb-2">
                 Loading Data...
               </h3>
-              <p className="text-gray-400 text-center max-w-md">
+              <p className="text-gray-200 text-center max-w-md">
                 Connecting to database and fetching real-time fall detection data.
                 Check console for connection status.
               </p>
