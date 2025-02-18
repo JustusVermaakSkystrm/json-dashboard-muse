@@ -8,21 +8,21 @@ interface KeypointsVisualizerProps {
 
 const calculateMovingAverage = (data: any[], periods: number) => {
   return data.map((item, index) => {
-    // Add null check for landmarks
-    if (!item.landmarks || !Array.isArray(item.landmarks)) {
+    // Add null check for keypoints
+    if (!item.keypoints || !Array.isArray(item.keypoints)) {
       return item;
     }
 
     const start = Math.max(0, index - periods + 1);
     const points = data.slice(start, index + 1)
-      .filter(point => point.landmarks && Array.isArray(point.landmarks));
+      .filter(point => point.keypoints && Array.isArray(point.keypoints));
     
     if (points.length === 0) return item;
 
     // Calculate average for each keypoint
-    const averagedKeypoints = item.landmarks.map((_, keypointIndex) => {
+    const averagedKeypoints = item.keypoints.map((_, keypointIndex) => {
       const sum = points.reduce((acc, point) => {
-        const keypoint = point.landmarks[keypointIndex];
+        const keypoint = point.keypoints[keypointIndex];
         if (!keypoint) return acc;
         
         return {
@@ -43,7 +43,7 @@ const calculateMovingAverage = (data: any[], periods: number) => {
 
     return {
       ...item,
-      landmarks: averagedKeypoints
+      keypoints: averagedKeypoints
     };
   });
 };
@@ -83,10 +83,10 @@ const KeypointsVisualizer = ({ data }: KeypointsVisualizerProps) => {
   const latestData = useMemo(() => {
     if (!Array.isArray(data) || data.length === 0) return null;
     
-    // Check if any data point has landmarks
-    const hasLandmarks = data.some(item => item.landmarks && Array.isArray(item.landmarks));
-    if (!hasLandmarks) {
-      console.log("No landmark data found in the dataset");
+    // Check if any data point has keypoints
+    const hasKeypoints = data.some(item => item.keypoints && Array.isArray(item.keypoints));
+    if (!hasKeypoints) {
+      console.log("No keypoint data found in the dataset");
       return null;
     }
 
@@ -95,7 +95,7 @@ const KeypointsVisualizer = ({ data }: KeypointsVisualizerProps) => {
     return smoothedData[smoothedData.length - 1];
   }, [data]);
 
-  if (!latestData || !latestData.landmarks) {
+  if (!latestData || !latestData.keypoints) {
     return (
       <div className="flex items-center justify-center h-64 bg-white/5 rounded-lg">
         <p className="text-white">No keypoint data available</p>
@@ -119,8 +119,8 @@ const KeypointsVisualizer = ({ data }: KeypointsVisualizerProps) => {
       <svg width={width} height={height} className="mx-auto">
         {/* Draw connections (stick figure lines) */}
         {connections.map(([start, end], index) => {
-          const startPoint = latestData.landmarks.find(l => l.index === start);
-          const endPoint = latestData.landmarks.find(l => l.index === end);
+          const startPoint = latestData.keypoints.find(k => k.index === start);
+          const endPoint = latestData.keypoints.find(k => k.index === end);
           
           if (!startPoint || !endPoint) return null;
           
@@ -138,7 +138,7 @@ const KeypointsVisualizer = ({ data }: KeypointsVisualizerProps) => {
         })}
         
         {/* Draw keypoints */}
-        {latestData.landmarks.map((point, index) => (
+        {latestData.keypoints.map((point, index) => (
           <circle
             key={`point-${index}`}
             cx={point.x * scaleX + offsetX}
