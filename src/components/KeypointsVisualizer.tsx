@@ -1,3 +1,4 @@
+
 import { useMemo } from "react";
 import { DataPoint, Keypoint } from "@/types/chart";
 
@@ -129,14 +130,15 @@ const KeypointsVisualizer = ({ data }: KeypointsVisualizerProps) => {
 
   if (!latestData || !latestData.keypoints) {
     return (
-      <div className="flex items-center justify-center h-64 bg-white/5 rounded-lg">
+      <div className="flex items-center justify-center h-48 bg-white/5 rounded-lg">
         <p className="text-white">No keypoint data available</p>
       </div>
     );
   }
 
-  const width = 400;
-  const height = 600;
+  // Reduced dimensions for a smaller visualization
+  const width = 300;
+  const height = 400;
   
   const scaleX = width * 0.8;
   const scaleY = height * 0.8;
@@ -147,7 +149,7 @@ const KeypointsVisualizer = ({ data }: KeypointsVisualizerProps) => {
 
   return (
     <div className="relative bg-white/5 rounded-lg p-4">
-      <h3 className="text-white mb-4 text-lg font-medium">Body Pose Visualization (Real-time)</h3>
+      <h3 className="text-white mb-2 text-lg font-medium">Body Pose Visualization (Real-time)</h3>
       <svg width={width} height={height} className="mx-auto">
         {connections.map(([start, end], index) => {
           const startPoint = latestData.keypoints.find(k => k.index === start);
