@@ -112,9 +112,10 @@ const KeypointsVisualizer = ({ data }: KeypointsVisualizerProps) => {
       return null;
     }
 
-    if (data.length >= 4) {
-      const dataToSmooth = data.slice(-4);
-      const smoothedData = calculateMovingAverage(dataToSmooth, 4);
+    // Changed to 2-period moving average
+    if (data.length >= 2) {
+      const dataToSmooth = data.slice(-2);
+      const smoothedData = calculateMovingAverage(dataToSmooth, 2);
       const result = smoothedData[smoothedData.length - 1];
       
       if (result.keypoints) {
