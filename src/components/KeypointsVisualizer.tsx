@@ -84,10 +84,14 @@ const connections = [
 
 const KeypointsVisualizer = ({ data }: KeypointsVisualizerProps) => {
   const latestData = useMemo(() => {
-    if (!Array.isArray(data) || data.length === 0) return null;
+    if (!Array.isArray(data) || data.length === 0) {
+      console.log("No data available");
+      return null;
+    }
     
     // Get the latest data point
     const latest = data[data.length - 1];
+    console.log("Latest data point:", latest);
     
     // Check if latest data point has keypoints
     if (!latest.keypoints || !Array.isArray(latest.keypoints)) {
@@ -97,7 +101,8 @@ const KeypointsVisualizer = ({ data }: KeypointsVisualizerProps) => {
 
     // Apply 5-period moving average only if we have enough data points
     if (data.length >= 5) {
-      const smoothedData = calculateMovingAverage(data.slice(-5), 5);
+      const dataToSmooth = data.slice(-5);
+      const smoothedData = calculateMovingAverage(dataToSmooth, 5);
       return smoothedData[smoothedData.length - 1];
     }
 
@@ -121,6 +126,9 @@ const KeypointsVisualizer = ({ data }: KeypointsVisualizerProps) => {
   const scaleY = height * 0.8;
   const offsetX = width * 0.1;
   const offsetY = height * 0.1;
+
+  // Add debug logging
+  console.log("Rendering with keypoints:", latestData.keypoints);
 
   return (
     <div className="relative bg-white/5 rounded-lg p-4">

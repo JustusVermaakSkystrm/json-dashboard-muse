@@ -42,7 +42,7 @@ const Index = () => {
         }));
 
         console.log("Processed data:", data);
-        setJsonData(data);
+        setJsonData(data.slice().reverse()); // Reverse the array to get chronological order
       } catch (error) {
         console.error("Error processing Firebase data:", error);
         toast({
