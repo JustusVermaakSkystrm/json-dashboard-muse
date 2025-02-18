@@ -50,6 +50,9 @@ const calculateMovingAverage = (data: DataPoint[], periods: number) => {
 
 // Define connections between keypoints to draw the stick figure
 const connections = [
+  // Head (circular shape)
+  [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [9, 10], [10, 0],
+  
   // Torso
   [11, 12], // shoulders
   [11, 23], // right hip
@@ -83,16 +86,22 @@ const KeypointsVisualizer = ({ data }: KeypointsVisualizerProps) => {
   const latestData = useMemo(() => {
     if (!Array.isArray(data) || data.length === 0) return null;
     
-    // Check if any data point has keypoints
-    const hasKeypoints = data.some(item => item.keypoints && Array.isArray(item.keypoints));
-    if (!hasKeypoints) {
-      console.log("No keypoint data found in the dataset");
+    // Get the latest data point
+    const latest = data[data.length - 1];
+    
+    // Check if latest data point has keypoints
+    if (!latest.keypoints || !Array.isArray(latest.keypoints)) {
+      console.log("No keypoint data found in the latest datapoint");
       return null;
     }
 
-    // Apply 5-period moving average
-    const smoothedData = calculateMovingAverage(data, 5);
-    return smoothedData[smoothedData.length - 1];
+    // Apply 5-period moving average only if we have enough data points
+    if (data.length >= 5) {
+      const smoothedData = calculateMovingAverage(data.slice(-5), 5);
+      return smoothedData[smoothedData.length - 1];
+    }
+
+    return latest;
   }, [data]);
 
   if (!latestData || !latestData.keypoints) {
@@ -115,7 +124,7 @@ const KeypointsVisualizer = ({ data }: KeypointsVisualizerProps) => {
 
   return (
     <div className="relative bg-white/5 rounded-lg p-4">
-      <h3 className="text-white mb-4 text-lg font-medium">Body Pose Visualization (5-period MA)</h3>
+      <h3 className="text-white mb-4 text-lg font-medium">Body Pose Visualization (Real-time)</h3>
       <svg width={width} height={height} className="mx-auto">
         {/* Draw connections (stick figure lines) */}
         {connections.map(([start, end], index) => {
@@ -136,17 +145,6 @@ const KeypointsVisualizer = ({ data }: KeypointsVisualizerProps) => {
             />
           );
         })}
-        
-        {/* Draw keypoints */}
-        {latestData.keypoints.map((point, index) => (
-          <circle
-            key={`point-${index}`}
-            cx={point.x * scaleX + offsetX}
-            cy={point.y * scaleY + offsetY}
-            r="4"
-            fill="#FF800A"
-          />
-        ))}
       </svg>
     </div>
   );
