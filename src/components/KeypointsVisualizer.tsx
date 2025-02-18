@@ -8,18 +8,28 @@ interface KeypointsVisualizerProps {
 
 const calculateMovingAverage = (data: any[], periods: number) => {
   return data.map((item, index) => {
+    // Add null check for landmarks
+    if (!item.landmarks || !Array.isArray(item.landmarks)) {
+      return item;
+    }
+
     const start = Math.max(0, index - periods + 1);
-    const points = data.slice(start, index + 1);
+    const points = data.slice(start, index + 1)
+      .filter(point => point.landmarks && Array.isArray(point.landmarks));
     
+    if (points.length === 0) return item;
+
     // Calculate average for each keypoint
     const averagedKeypoints = item.landmarks.map((_, keypointIndex) => {
       const sum = points.reduce((acc, point) => {
         const keypoint = point.landmarks[keypointIndex];
+        if (!keypoint) return acc;
+        
         return {
-          x: acc.x + keypoint.x,
-          y: acc.y + keypoint.y,
-          z: acc.z + keypoint.z,
-          index: keypoint.index
+          x: acc.x + (keypoint.x || 0),
+          y: acc.y + (keypoint.y || 0),
+          z: acc.z + (keypoint.z || 0),
+          index: keypointIndex
         };
       }, { x: 0, y: 0, z: 0, index: 0 });
 
@@ -73,6 +83,13 @@ const KeypointsVisualizer = ({ data }: KeypointsVisualizerProps) => {
   const latestData = useMemo(() => {
     if (!Array.isArray(data) || data.length === 0) return null;
     
+    // Check if any data point has landmarks
+    const hasLandmarks = data.some(item => item.landmarks && Array.isArray(item.landmarks));
+    if (!hasLandmarks) {
+      console.log("No landmark data found in the dataset");
+      return null;
+    }
+
     // Apply 5-period moving average
     const smoothedData = calculateMovingAverage(data, 5);
     return smoothedData[smoothedData.length - 1];
