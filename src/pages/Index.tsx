@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import DataVisualizer from "@/components/DataVisualizer";
 import DataTable from "@/components/DataTable";
+import KeypointsVisualizer from "@/components/KeypointsVisualizer";
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/lib/firebase";
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
@@ -99,7 +100,10 @@ const Index = () => {
           </Card>
         ) : (
           <>
-            <DataVisualizer data={jsonData} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <DataVisualizer data={jsonData} />
+              <KeypointsVisualizer data={jsonData} />
+            </div>
             <DataTable 
               data={jsonData.map(item => ({
                 timestamp: item.formattedTime,

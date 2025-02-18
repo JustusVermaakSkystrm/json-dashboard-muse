@@ -1,0 +1,138 @@
+
+import { useMemo } from "react";
+import { DataPoint } from "@/types/chart";
+
+interface KeypointsVisualizerProps {
+  data: DataPoint[];
+}
+
+const calculateMovingAverage = (data: any[], periods: number) => {
+  return data.map((item, index) => {
+    const start = Math.max(0, index - periods + 1);
+    const points = data.slice(start, index + 1);
+    
+    // Calculate average for each keypoint
+    const averagedKeypoints = item.landmarks.map((_, keypointIndex) => {
+      const sum = points.reduce((acc, point) => {
+        const keypoint = point.landmarks[keypointIndex];
+        return {
+          x: acc.x + keypoint.x,
+          y: acc.y + keypoint.y,
+          z: acc.z + keypoint.z,
+          index: keypoint.index
+        };
+      }, { x: 0, y: 0, z: 0, index: 0 });
+
+      return {
+        x: sum.x / points.length,
+        y: sum.y / points.length,
+        z: sum.z / points.length,
+        index: sum.index
+      };
+    });
+
+    return {
+      ...item,
+      landmarks: averagedKeypoints
+    };
+  });
+};
+
+// Define connections between keypoints to draw the stick figure
+const connections = [
+  // Torso
+  [11, 12], // shoulders
+  [11, 23], // right hip
+  [12, 24], // left hip
+  [23, 24], // hips
+  
+  // Right arm
+  [11, 13], // upper arm
+  [13, 15], // forearm
+  [15, 17], // hand
+  
+  // Left arm
+  [12, 14], // upper arm
+  [14, 16], // forearm
+  [16, 18], // hand
+  
+  // Right leg
+  [23, 25], // thigh
+  [25, 27], // shin
+  [27, 29], // foot
+  [29, 31], // toe
+  
+  // Left leg
+  [24, 26], // thigh
+  [26, 28], // shin
+  [28, 30], // foot
+  [30, 32], // toe
+];
+
+const KeypointsVisualizer = ({ data }: KeypointsVisualizerProps) => {
+  const latestData = useMemo(() => {
+    if (!Array.isArray(data) || data.length === 0) return null;
+    
+    // Apply 5-period moving average
+    const smoothedData = calculateMovingAverage(data, 5);
+    return smoothedData[smoothedData.length - 1];
+  }, [data]);
+
+  if (!latestData || !latestData.landmarks) {
+    return (
+      <div className="flex items-center justify-center h-64 bg-white/5 rounded-lg">
+        <p className="text-white">No keypoint data available</p>
+      </div>
+    );
+  }
+
+  // Canvas dimensions
+  const width = 400;
+  const height = 600;
+  
+  // Scale factors to fit the visualization in our canvas
+  const scaleX = width * 0.8;
+  const scaleY = height * 0.8;
+  const offsetX = width * 0.1;
+  const offsetY = height * 0.1;
+
+  return (
+    <div className="relative bg-white/5 rounded-lg p-4">
+      <h3 className="text-white mb-4 text-lg font-medium">Body Pose Visualization (5-period MA)</h3>
+      <svg width={width} height={height} className="mx-auto">
+        {/* Draw connections (stick figure lines) */}
+        {connections.map(([start, end], index) => {
+          const startPoint = latestData.landmarks.find(l => l.index === start);
+          const endPoint = latestData.landmarks.find(l => l.index === end);
+          
+          if (!startPoint || !endPoint) return null;
+          
+          return (
+            <line
+              key={`connection-${index}`}
+              x1={startPoint.x * scaleX + offsetX}
+              y1={startPoint.y * scaleY + offsetY}
+              x2={endPoint.x * scaleX + offsetX}
+              y2={endPoint.y * scaleY + offsetY}
+              stroke="white"
+              strokeWidth="2"
+            />
+          );
+        })}
+        
+        {/* Draw keypoints */}
+        {latestData.landmarks.map((point, index) => (
+          <circle
+            key={`point-${index}`}
+            cx={point.x * scaleX + offsetX}
+            cy={point.y * scaleY + offsetY}
+            r="4"
+            fill="#FF800A"
+          />
+        ))}
+      </svg>
+    </div>
+  );
+};
+
+export default KeypointsVisualizer;
