@@ -1,12 +1,12 @@
 
 import { useMemo } from "react";
-import { DataPoint } from "@/types/chart";
+import { DataPoint, Keypoint } from "@/types/chart";
 
 interface KeypointsVisualizerProps {
   data: DataPoint[];
 }
 
-const calculateMovingAverage = (data: any[], periods: number) => {
+const calculateMovingAverage = (data: DataPoint[], periods: number) => {
   return data.map((item, index) => {
     // Add null check for keypoints
     if (!item.keypoints || !Array.isArray(item.keypoints)) {
@@ -31,7 +31,7 @@ const calculateMovingAverage = (data: any[], periods: number) => {
           z: acc.z + (keypoint.z || 0),
           index: keypointIndex
         };
-      }, { x: 0, y: 0, z: 0, index: 0 });
+      }, { x: 0, y: 0, z: 0, index: keypointIndex });
 
       return {
         x: sum.x / points.length,

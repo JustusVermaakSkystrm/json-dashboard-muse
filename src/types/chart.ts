@@ -1,15 +1,22 @@
 
+export interface Keypoint {
+  index: number;
+  x: number;
+  y: number;
+  z: number;
+}
+
 export interface DataPoint {
   timestamp: number;
-  com: { x: number; y: number };
-  velocity: { x: number; y: number };
-  acceleration: { x: number; y: number };
-  trunk_angle: number;
   fall_probability: number;
+  trunk_angle: number;
   hip_angle: number;
   sit_probability: number;
   stand_probability: number;
-  landmarks: any[];
+  keypoints: Keypoint[];
+  formattedTime?: string;
+  fall_probability_percent?: string;
+  id?: string;
 }
 
 export interface ChartDataPoint {
