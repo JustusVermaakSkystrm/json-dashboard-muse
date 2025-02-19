@@ -9,6 +9,7 @@ interface KeypointsVisualizerProps {
 const calculateMovingAverage = (data: DataPoint[], periods: number) => {
   return data.map((item, index) => {
     if (!item.keypoints || !Array.isArray(item.keypoints)) {
+      console.log("Missing keypoints for item:", item);
       return item;
     }
 
@@ -16,7 +17,10 @@ const calculateMovingAverage = (data: DataPoint[], periods: number) => {
     const points = data.slice(start, index + 1)
       .filter(point => point.keypoints && Array.isArray(point.keypoints));
     
-    if (points.length === 0) return item;
+    if (points.length === 0) {
+      console.log("No valid points found for moving average");
+      return item;
+    }
 
     const averagedKeypoints = item.keypoints.map((_, keypointIndex) => {
       const sum = points.reduce((acc, point) => {
@@ -77,7 +81,10 @@ const normalizeKeypoints = (keypoints: Keypoint[]) => {
   const leftShoulder = keypoints.find(k => k.index === 11);
   const rightShoulder = keypoints.find(k => k.index === 12);
   
-  if (!leftShoulder || !rightShoulder) return keypoints;
+  if (!leftShoulder || !rightShoulder) {
+    console.log("Could not find shoulder keypoints:", { leftShoulder, rightShoulder });
+    return keypoints;
+  }
 
   const shoulderWidth = Math.sqrt(
     Math.pow(rightShoulder.x - leftShoulder.x, 2) +
@@ -104,6 +111,9 @@ const KeypointsVisualizer = ({ data }: KeypointsVisualizerProps) => {
       return null;
     }
     
+    console.log("Processing data points:", data.length);
+    console.log("First data point sample:", data[0]);
+    
     const latest = data[data.length - 1];
     console.log("Latest data point:", latest);
     
@@ -114,17 +124,21 @@ const KeypointsVisualizer = ({ data }: KeypointsVisualizerProps) => {
 
     // Changed to 2-period moving average
     if (data.length >= 2) {
+      console.log("Applying 2-period moving average");
       const dataToSmooth = data.slice(-2);
       const smoothedData = calculateMovingAverage(dataToSmooth, 2);
       const result = smoothedData[smoothedData.length - 1];
       
       if (result.keypoints) {
+        console.log("Pre-normalization keypoints:", result.keypoints);
         result.keypoints = normalizeKeypoints(result.keypoints);
+        console.log("Post-normalization keypoints:", result.keypoints);
       }
       
       return result;
     }
 
+    console.log("Using single data point");
     latest.keypoints = normalizeKeypoints(latest.keypoints);
     return latest;
   }, [data]);
@@ -156,7 +170,10 @@ const KeypointsVisualizer = ({ data }: KeypointsVisualizerProps) => {
           const startPoint = latestData.keypoints.find(k => k.index === start);
           const endPoint = latestData.keypoints.find(k => k.index === end);
           
-          if (!startPoint || !endPoint) return null;
+          if (!startPoint || !endPoint) {
+            console.log(`Missing connection points for indices ${start}-${end}`);
+            return null;
+          }
           
           return (
             <line
