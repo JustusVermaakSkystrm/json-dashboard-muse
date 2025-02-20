@@ -78,7 +78,6 @@ const Index = () => {
               <Badge className="mb-2 bg-[#E2E8F0] text-gray-600 hover:bg-[#CBD5E1]">
                 Dashboard
               </Badge>
-              {jsonData && <AIActivityIndicator />}
               <div>
                 <h1 className="text-3xl font-semibold text-white">Fall Detection Monitor</h1>
                 <p className="text-gray-200 mt-1">
@@ -106,7 +105,15 @@ const Index = () => {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <DataVisualizer data={jsonData} />
-              <KeypointsVisualizer data={jsonData} />
+              <div className="relative bg-white/5 rounded-lg p-4">
+                <h3 className="text-white mb-2 text-lg font-medium">Body Pose Visualization (Real-time)</h3>
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    {jsonData && <AIActivityIndicator />}
+                  </div>
+                  <KeypointsVisualizer data={jsonData} />
+                </div>
+              </div>
             </div>
             <DataTable 
               data={jsonData.map(item => ({
