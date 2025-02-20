@@ -78,10 +78,10 @@ const AIActivityIndicator = () => {
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw black circular background with higher opacity
+      // Draw black circular background with full opacity
       ctx.beginPath();
       ctx.arc(canvas.width / 2, canvas.height / 2, canvas.width / 2, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.95)'; // Increased opacity
+      ctx.fillStyle = 'rgb(0, 0, 0)'; // Changed to fully opaque black
       ctx.fill();
 
       // Create gradient
@@ -159,7 +159,7 @@ const AIActivityIndicator = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="opacity-80"
+      className="opacity-100" // Changed from opacity-80 to opacity-100
       style={{
         width: '50px',
         height: '50px'
