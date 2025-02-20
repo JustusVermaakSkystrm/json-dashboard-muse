@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { db } from "@/lib/firebase";
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import BrandLogo from "@/components/BrandLogo";
+import AIActivityIndicator from "@/components/AIActivityIndicator";
 
 const Index = () => {
   const [jsonData, setJsonData] = useState(null);
@@ -73,14 +74,17 @@ const Index = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <BrandLogo />
-            <div>
+            <div className="flex items-center gap-2">
               <Badge className="mb-2 bg-[#E2E8F0] text-gray-600 hover:bg-[#CBD5E1]">
                 Dashboard
               </Badge>
-              <h1 className="text-3xl font-semibold text-white">Fall Detection Monitor</h1>
-              <p className="text-gray-200 mt-1">
-                Real-time fall detection data visualization
-              </p>
+              {jsonData && <AIActivityIndicator />}
+              <div>
+                <h1 className="text-3xl font-semibold text-white">Fall Detection Monitor</h1>
+                <p className="text-gray-200 mt-1">
+                  Real-time fall detection data visualization
+                </p>
+              </div>
             </div>
           </div>
         </div>
