@@ -174,8 +174,8 @@ const AIActivityIndicator = () => {
       ref={canvasRef}
       className="opacity-100"
       style={{
-        width: '300px',  // Increased from 50px
-        height: '400px'  // Increased from 50px to match KeypointsVisualizer dimensions
+        width: '50px',
+        height: '50px'
       }}
     />
   );
