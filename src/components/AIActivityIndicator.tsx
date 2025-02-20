@@ -33,6 +33,18 @@ const AIActivityIndicator = () => {
     const COALESCENCE_INTERVAL = 3000;
     const COALESCENCE_DURATION = 1000;
 
+    // Function to randomize particle positions
+    const randomizeParticles = () => {
+      particles.forEach(particle => {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = Math.random() * 30 + 10;
+        particle.angle = angle;
+        particle.radius = radius;
+        particle.speedX = (Math.random() - 0.5) * BASE_SPEED;
+        particle.speedY = (Math.random() - 0.5) * BASE_SPEED;
+      });
+    };
+
     // Initialize particles
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       const angle = Math.random() * Math.PI * 2;
@@ -43,7 +55,7 @@ const AIActivityIndicator = () => {
         size: Math.random() * 3 + 1,
         speedX: (Math.random() - 0.5) * BASE_SPEED,
         speedY: (Math.random() - 0.5) * BASE_SPEED,
-        opacity: Math.random() * 0.5 + 0.5, // Increased base opacity
+        opacity: Math.random() * 0.5 + 0.5,
         angle: angle,
         radius: radius
       });
@@ -103,6 +115,7 @@ const AIActivityIndicator = () => {
         setTimeout(() => {
           isCoalescing = false;
           lastCoalescenceTime = currentTime;
+          randomizeParticles(); // Randomize particles when expanding
         }, COALESCENCE_DURATION);
       }
 
@@ -159,7 +172,7 @@ const AIActivityIndicator = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="opacity-100" // Changed from opacity-80 to opacity-100
+      className="opacity-100"
       style={{
         width: '50px',
         height: '50px'
