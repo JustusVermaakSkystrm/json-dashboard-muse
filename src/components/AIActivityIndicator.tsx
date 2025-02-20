@@ -1,4 +1,3 @@
-
 import { useEffect, useRef } from 'react';
 
 const AIActivityIndicator = () => {
@@ -23,38 +22,55 @@ const AIActivityIndicator = () => {
       speedX: number;
       speedY: number;
       opacity: number;
+      angle: number;
+      radius: number;
     }> = [];
 
     const PARTICLE_COUNT = 30;
     const BASE_SPEED = 0.5;
-    const COALESCENCE_INTERVAL = 3000; // Time between coalescence events
-    const COALESCENCE_DURATION = 1000; // Duration of coalescence
+    const ROTATION_SPEED = 0.001;
+    const COALESCENCE_INTERVAL = 3000;
+    const COALESCENCE_DURATION = 1000;
 
     // Initialize particles
     for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = Math.random() * 30 + 10;
       particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
+        x: canvas.width / 2 + Math.cos(angle) * radius,
+        y: canvas.height / 2 + Math.sin(angle) * radius,
         size: Math.random() * 3 + 1,
         speedX: (Math.random() - 0.5) * BASE_SPEED,
         speedY: (Math.random() - 0.5) * BASE_SPEED,
-        opacity: Math.random() * 0.5 + 0.3
+        opacity: Math.random() * 0.5 + 0.3,
+        angle: angle,
+        radius: radius
       });
     }
 
     let isCoalescing = false;
     let coalesceTarget = { x: canvas.width / 2, y: canvas.height / 2 };
     let lastCoalescenceTime = Date.now();
+    let globalRotation = 0;
 
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw black circular background
+      ctx.beginPath();
+      ctx.arc(canvas.width / 2, canvas.height / 2, canvas.width / 2, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+      ctx.fill();
 
       // Create gradient
       const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
       gradient.addColorStop(0, '#7829B0'); // Purple
       gradient.addColorStop(1, '#FF800A'); // Orange
 
-      // Check if it's time for a new coalescence event
+      // Update global rotation
+      globalRotation += ROTATION_SPEED;
+
+      // Check for coalescence
       const currentTime = Date.now();
       if (currentTime - lastCoalescenceTime > COALESCENCE_INTERVAL && !isCoalescing) {
         isCoalescing = true;
@@ -77,13 +93,23 @@ const AIActivityIndicator = () => {
           particle.x += dx * 0.02;
           particle.y += dy * 0.02;
         } else {
-          // Random movement
+          // Rotate particles around center
+          particle.angle += ROTATION_SPEED;
+          particle.x = canvas.width / 2 + Math.cos(particle.angle + globalRotation) * particle.radius;
+          particle.y = canvas.height / 2 + Math.sin(particle.angle + globalRotation) * particle.radius;
+          
+          // Add some random movement
           particle.x += particle.speedX;
           particle.y += particle.speedY;
 
-          // Bounce off edges
-          if (particle.x <= 0 || particle.x >= canvas.width) particle.speedX *= -1;
-          if (particle.y <= 0 || particle.y >= canvas.height) particle.speedY *= -1;
+          // Keep particles within bounds
+          const dx = particle.x - canvas.width / 2;
+          const dy = particle.y - canvas.height / 2;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          if (distance > canvas.width / 2 - 5) {
+            particle.speedX *= -1;
+            particle.speedY *= -1;
+          }
         }
 
         // Draw particle
