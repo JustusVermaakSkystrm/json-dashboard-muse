@@ -17,8 +17,8 @@ const GaugeChart = ({ value, title }: GaugeChartProps) => {
   ];
 
   return (
-    <div className="w-full h-[300px] bg-white/5 backdrop-blur-sm rounded-lg p-4">
-      <h3 className="text-lg font-medium text-white mb-4 text-center">{title}</h3>
+    <div className="w-[200px] h-[200px] bg-white/5 backdrop-blur-sm rounded-lg p-4">
+      <h3 className="text-lg font-medium text-white mb-2 text-center">{title}</h3>
       <ResponsiveContainer width="100%" height="100%">
         <RadialBarChart
           cx="50%"

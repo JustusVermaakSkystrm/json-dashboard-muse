@@ -41,8 +41,8 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
         };
       });
 
-    // Apply moving averages with 10 period window
-    return calculateMovingAverage(baseData, 10, 'probability');
+    // Apply moving averages with 5 period window
+    return calculateMovingAverage(baseData, 5, 'probability');
   }, [data]);
 
   const lastHourData = useMemo(() => {
@@ -50,7 +50,7 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
     return chartData.filter(item => item.timestamp > cutoffTime);
   }, [chartData]);
 
-  // Calculate current values (last value from 10-period moving average)
+  // Calculate current values (last value from 5-period moving average)
   const currentValues = useMemo(() => {
     if (chartData.length === 0) return { probability: 0 };
     const latest = chartData[chartData.length - 1];
@@ -61,10 +61,12 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
 
   return (
     <div className="grid grid-cols-1 gap-4">
-      <GaugeChart 
-        value={currentValues.probability}
-        title="Current Fall Probability (10-period MA)" 
-      />
+      <div className="flex justify-center">
+        <GaugeChart 
+          value={currentValues.probability}
+          title="Status" 
+        />
+      </div>
       <FallProbabilityChart 
         data={lastHourData} 
         title="Fall Probability (Last Hour)" 
