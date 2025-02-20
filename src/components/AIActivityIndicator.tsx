@@ -1,3 +1,4 @@
+
 import { useEffect, useRef } from 'react';
 
 const AIActivityIndicator = () => {
@@ -42,7 +43,7 @@ const AIActivityIndicator = () => {
         size: Math.random() * 3 + 1,
         speedX: (Math.random() - 0.5) * BASE_SPEED,
         speedY: (Math.random() - 0.5) * BASE_SPEED,
-        opacity: Math.random() * 0.5 + 0.3,
+        opacity: Math.random() * 0.5 + 0.5, // Increased base opacity
         angle: angle,
         radius: radius
       });
@@ -53,13 +54,34 @@ const AIActivityIndicator = () => {
     let lastCoalescenceTime = Date.now();
     let globalRotation = 0;
 
+    const drawSparkle = (x: number, y: number, size: number, opacity: number) => {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(Math.PI / 4);
+      
+      // Create sparkle gradient
+      const sparkleGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 2);
+      sparkleGradient.addColorStop(0, `rgba(255, 255, 255, ${opacity})`);
+      sparkleGradient.addColorStop(0.5, `rgba(255, 255, 255, ${opacity * 0.5})`);
+      sparkleGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+      // Draw sparkle cross
+      ctx.fillStyle = sparkleGradient;
+      ctx.beginPath();
+      ctx.rect(-size / 8, -size, size / 4, size * 2);
+      ctx.rect(-size, -size / 8, size * 2, size / 4);
+      ctx.fill();
+      
+      ctx.restore();
+    };
+
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw black circular background
+      // Draw black circular background with higher opacity
       ctx.beginPath();
       ctx.arc(canvas.width / 2, canvas.height / 2, canvas.width / 2, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.95)'; // Increased opacity
       ctx.fill();
 
       // Create gradient
@@ -87,7 +109,6 @@ const AIActivityIndicator = () => {
       // Update and draw particles
       particles.forEach(particle => {
         if (isCoalescing) {
-          // Move towards coalescence point
           const dx = coalesceTarget.x - particle.x;
           const dy = coalesceTarget.y - particle.y;
           particle.x += dx * 0.02;
@@ -112,12 +133,17 @@ const AIActivityIndicator = () => {
           }
         }
 
-        // Draw particle
+        // Draw main particle
         ctx.beginPath();
         ctx.fillStyle = gradient;
         ctx.globalAlpha = particle.opacity;
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
         ctx.fill();
+
+        // Add sparkle effect
+        if (Math.random() < 0.3) { // 30% chance of sparkle per particle per frame
+          drawSparkle(particle.x, particle.y, particle.size * 2, particle.opacity * 0.8);
+        }
       });
 
       requestAnimationFrame(animate);
