@@ -43,7 +43,7 @@ const Index = () => {
         }));
 
         console.log("Processed data:", data);
-        setJsonData(data.slice().reverse()); // Reverse the array to get chronological order
+        setJsonData(data); // Use the data directly without reversing
       } catch (error) {
         console.error("Error processing Firebase data:", error);
         toast({
@@ -67,10 +67,14 @@ const Index = () => {
 
   // Prepare table data
   const prepareTableData = () => {
-    if (!jsonData || !Array.isArray(jsonData)) return [];
+    if (!jsonData || !Array.isArray(jsonData)) {
+      console.log("No data available for table");
+      return [];
+    }
     
     console.log("Preparing table data from:", jsonData.length, "items");
     
+    // Format all date fields and percentages
     return jsonData.map(item => ({
       timestamp: item.formattedTime || new Date(item.timestamp * 1000).toLocaleString(),
       fall_probability: item.fall_probability_percent || `${(item.fall_probability || 0).toFixed(2)}%`,
@@ -82,7 +86,7 @@ const Index = () => {
   };
 
   const tableData = prepareTableData();
-  console.log("Table data ready:", tableData.length, "rows");
+  console.log("Table data ready:", tableData.length, "rows", tableData[0]);
 
   return (
     <div className="min-h-screen p-6 space-y-6 transition-all duration-300" 

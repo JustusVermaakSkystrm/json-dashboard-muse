@@ -33,6 +33,21 @@ const DataTable = ({ data, searchQuery }: DataTableProps) => {
     );
   }
 
+  // Check if data is empty
+  if (data.length === 0) {
+    console.log("DataTable received empty array");
+    return (
+      <Card className="bg-white/50 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="text-lg font-medium">Data Table</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4">
+          <p>No data available</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   // Process data safely
   const columns = data.length > 0 ? Object.keys(data[0]) : [];
   
