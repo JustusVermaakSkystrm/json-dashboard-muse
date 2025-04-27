@@ -34,7 +34,13 @@ const Index = () => {
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       try {
-        console.log("Received Firebase update");
+        console.log("Received Firebase update with", querySnapshot.docs.length, "documents");
+        
+        if (querySnapshot.empty) {
+          console.log("Firebase returned empty result");
+          return;
+        }
+
         const data = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
@@ -42,8 +48,10 @@ const Index = () => {
           fall_probability_percent: `${(doc.data().fall_probability || 0).toFixed(2)}%`
         }));
 
-        console.log("Processed data:", data);
-        setJsonData(data); // Use the data directly without reversing
+        console.log(`Processed ${data.length} documents from Firebase`);
+        console.log("First document sample:", data[0]);
+        
+        setJsonData(data);
       } catch (error) {
         console.error("Error processing Firebase data:", error);
         toast({
@@ -86,7 +94,12 @@ const Index = () => {
   };
 
   const tableData = prepareTableData();
-  console.log("Table data ready:", tableData.length, "rows", tableData[0]);
+  console.log("Table data ready:", tableData.length, "rows");
+  
+  // Only log the first row if data exists
+  if (tableData.length > 0) {
+    console.log("First table data row:", tableData[0]);
+  }
 
   return (
     <div className="min-h-screen p-6 space-y-6 transition-all duration-300" 

@@ -24,7 +24,7 @@ const calculateMovingAverage = (data: DataPoint[], periods: number) => {
 
     const averagedKeypoints = item.keypoints.map((_, keypointIndex) => {
       const sum = points.reduce((acc, point) => {
-        const keypoint = point.keypoints[keypointIndex];
+        const keypoint = point.keypoints ? point.keypoints[keypointIndex] : null;
         if (!keypoint) return acc;
         
         return {
@@ -78,6 +78,11 @@ const connections = [
 ];
 
 const normalizeKeypoints = (keypoints: Keypoint[]) => {
+  if (!keypoints || keypoints.length === 0) {
+    console.log("No keypoints to normalize");
+    return [];
+  }
+  
   const leftShoulder = keypoints.find(k => k.index === 11);
   const rightShoulder = keypoints.find(k => k.index === 12);
   
@@ -90,6 +95,11 @@ const normalizeKeypoints = (keypoints: Keypoint[]) => {
     Math.pow(rightShoulder.x - leftShoulder.x, 2) +
     Math.pow(rightShoulder.y - leftShoulder.y, 2)
   );
+
+  if (shoulderWidth === 0) {
+    console.log("Invalid shoulder width (zero)");
+    return keypoints;
+  }
 
   const targetWidth = 0.15;
   const scale = targetWidth / shoulderWidth;
@@ -107,43 +117,43 @@ const normalizeKeypoints = (keypoints: Keypoint[]) => {
 const KeypointsVisualizer = ({ data }: KeypointsVisualizerProps) => {
   const latestData = useMemo(() => {
     if (!Array.isArray(data) || data.length === 0) {
-      console.log("No data available");
+      console.log("KeypointsVisualizer: No data available");
       return null;
     }
     
-    console.log("Processing data points:", data.length);
-    console.log("First data point sample:", data[0]);
+    console.log("KeypointsVisualizer: Processing", data.length, "data points");
     
-    const latest = data[data.length - 1];
-    console.log("Latest data point:", latest);
+    // Take the most recent data point
+    const latest = data[0];
+    console.log("KeypointsVisualizer: Latest data timestamp:", new Date(latest.timestamp * 1000).toLocaleString());
     
     if (!latest.keypoints || !Array.isArray(latest.keypoints)) {
-      console.log("No keypoint data found in the latest datapoint");
+      console.log("KeypointsVisualizer: No keypoint data found in the latest datapoint");
       return null;
     }
 
-    // Changed to 2-period moving average
+    console.log("KeypointsVisualizer: Found", latest.keypoints.length, "keypoints");
+    
+    // Changed to 2-period moving average if possible
     if (data.length >= 2) {
-      console.log("Applying 2-period moving average");
-      const dataToSmooth = data.slice(-2);
+      console.log("KeypointsVisualizer: Applying 2-period moving average");
+      const dataToSmooth = data.slice(0, 2);
       const smoothedData = calculateMovingAverage(dataToSmooth, 2);
-      const result = smoothedData[smoothedData.length - 1];
+      const result = smoothedData[0];
       
-      if (result.keypoints) {
-        console.log("Pre-normalization keypoints:", result.keypoints);
+      if (result?.keypoints) {
         result.keypoints = normalizeKeypoints(result.keypoints);
-        console.log("Post-normalization keypoints:", result.keypoints);
       }
       
       return result;
     }
 
-    console.log("Using single data point");
+    console.log("KeypointsVisualizer: Using single data point");
     latest.keypoints = normalizeKeypoints(latest.keypoints);
     return latest;
   }, [data]);
 
-  if (!latestData || !latestData.keypoints) {
+  if (!latestData || !latestData.keypoints || latestData.keypoints.length === 0) {
     return (
       <div className="flex items-center justify-center h-48 bg-white/5 rounded-lg">
         <p className="text-white">No keypoint data available</p>
@@ -160,8 +170,6 @@ const KeypointsVisualizer = ({ data }: KeypointsVisualizerProps) => {
   const offsetX = width * 0.1;
   const offsetY = height * 0.1;
 
-  console.log("Rendering with keypoints:", latestData.keypoints);
-
   return (
     <div className="relative bg-white/5 rounded-lg p-4">
       <h3 className="text-white mb-2 text-lg font-medium">Body Pose Visualization (Real-time)</h3>
@@ -171,7 +179,6 @@ const KeypointsVisualizer = ({ data }: KeypointsVisualizerProps) => {
           const endPoint = latestData.keypoints.find(k => k.index === end);
           
           if (!startPoint || !endPoint) {
-            console.log(`Missing connection points for indices ${start}-${end}`);
             return null;
           }
           

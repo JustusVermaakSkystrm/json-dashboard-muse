@@ -24,30 +24,36 @@ const calculateMovingAverage = (data: any[], periods: number, key: string) => {
 
 const DataVisualizer = ({ data }: DataVisualizerProps) => {
   const chartData = useMemo(() => {
-    if (!Array.isArray(data)) return [];
+    if (!Array.isArray(data) || data.length === 0) {
+      console.log("DataVisualizer: No data available for chart");
+      return [];
+    }
 
+    console.log("DataVisualizer processing", data.length, "data points");
+    
     // First, create the base data points
-    const baseData = [...data]
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .reverse()
-      .map((item) => {
-        const fallProbability = item.fall_probability / 100;
-        const timestamp = item.timestamp;
+    const baseData = data.map((item) => {
+      const fallProbability = item.fall_probability / 100;
+      const timestamp = item.timestamp;
 
-        return {
-          name: format(new Date(timestamp * 1000), 'HH:mm:ss'),
-          probability: Number(fallProbability),
-          timestamp: new Date(timestamp * 1000)
-        };
-      });
+      return {
+        name: format(new Date(timestamp * 1000), 'HH:mm:ss'),
+        probability: Number(fallProbability),
+        timestamp: new Date(timestamp * 1000)
+      };
+    });
 
     // Apply moving averages with 5 period window
     return calculateMovingAverage(baseData, 5, 'probability');
   }, [data]);
 
   const lastHourData = useMemo(() => {
+    if (chartData.length === 0) return [];
+    
     const cutoffTime = subHours(new Date(), 1);
-    return chartData.filter(item => item.timestamp > cutoffTime);
+    const filtered = chartData.filter(item => item.timestamp > cutoffTime);
+    console.log("DataVisualizer: Last hour data points:", filtered.length);
+    return filtered;
   }, [chartData]);
 
   // Calculate current values (last value from 5-period moving average)
