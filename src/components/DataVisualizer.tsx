@@ -3,7 +3,7 @@ import { format, subHours } from "date-fns";
 import { DataPoint } from "@/types/chart";
 import FallProbabilityChart from "./charts/FallProbabilityChart";
 import GaugeChart from "./charts/GaugeChart";
-import { PersonStanding, Sitting } from "lucide-react";
+import { PersonStanding, ArrowDownToLine } from "lucide-react";
 
 interface DataVisualizerProps {
   data: DataPoint[];
@@ -36,8 +36,8 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
     
     const baseData = sortedData.map((item) => {
       const fallProbability = item.fall_probability / 100;
-      const sitProbability = (item.sit_probability || 0);
-      const standProbability = (item.stand_probability || 0);
+      const sitProbability = (item.sit_probability || 0) * 100;
+      const standProbability = (item.stand_probability || 0) * 100;
       const timestamp = item.timestamp;
 
       return {
@@ -87,7 +87,7 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
           {currentValues.isStanding ? (
             <PersonStanding className="w-24 h-24 text-green-400" />
           ) : (
-            <Sitting className="w-24 h-24 text-blue-400" />
+            <ArrowDownToLine className="w-24 h-24 text-blue-400" />
           )}
         </div>
       </div>

@@ -26,4 +26,3 @@ export interface ChartDataPoint {
   standProbability?: number;
   timestamp: Date;
 }
-
