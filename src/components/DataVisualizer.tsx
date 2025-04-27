@@ -37,8 +37,9 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
     
     const baseData = sortedData.map((item) => {
       const fallProbability = item.fall_probability / 100;
-      const sitProbability = (item.sit_probability || 0) * 100; // Multiply by 100 to convert to percentage
-      const standProbability = (item.stand_probability || 0) * 100; // Multiply by 100 to convert to percentage
+      // Make sure we multiply by 100 to convert from 0-1 to 0-100 percentage
+      const sitProbability = (item.sit_probability || 0) * 100; 
+      const standProbability = (item.stand_probability || 0) * 100; 
       const timestamp = item.timestamp;
 
       return {
@@ -84,11 +85,17 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
           value={currentValues.probability}
           title="Status" 
         />
-        <div className="bg-white/5 backdrop-blur-sm rounded-lg p-4 flex items-center justify-center w-[200px] h-[200px]">
+        <div className="bg-white/5 backdrop-blur-sm rounded-lg p-4 flex flex-col items-center justify-center w-[200px] h-[200px]">
           {currentValues.isStanding ? (
-            <PersonStanding className="w-24 h-24 text-green-400" />
+            <>
+              <PersonStanding className="w-24 h-24 text-green-400" />
+              <span className="text-white mt-2">Standing</span>
+            </>
           ) : (
-            <ArrowDownToLine className="w-24 h-24 text-blue-400" />
+            <>
+              <ArrowDownToLine className="w-24 h-24 text-blue-400" />
+              <span className="text-white mt-2">Sitting</span>
+            </>
           )}
         </div>
       </div>

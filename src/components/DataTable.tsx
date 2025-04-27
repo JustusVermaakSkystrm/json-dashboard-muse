@@ -58,6 +58,30 @@ const DataTable = ({ data, searchQuery }: DataTableProps) => {
     )
   );
 
+  // Format data for display
+  const formattedData = filteredData.map(row => {
+    const newRow = {...row};
+    
+    // Format sit_probability and stand_probability to show as 0% to 100%
+    if ('sit_probability' in newRow && typeof newRow.sit_probability === 'string') {
+      // Check if it's already formatted properly
+      if (!newRow.sit_probability.includes('%')) {
+        const value = parseFloat(newRow.sit_probability);
+        newRow.sit_probability = `${(value * 100).toFixed(2)}%`;
+      }
+    }
+    
+    if ('stand_probability' in newRow && typeof newRow.stand_probability === 'string') {
+      // Check if it's already formatted properly
+      if (!newRow.stand_probability.includes('%')) {
+        const value = parseFloat(newRow.stand_probability);
+        newRow.stand_probability = `${(value * 100).toFixed(2)}%`;
+      }
+    }
+    
+    return newRow;
+  });
+
   return (
     <Card className="bg-white/50 backdrop-blur-sm">
       <CardHeader>
@@ -74,7 +98,7 @@ const DataTable = ({ data, searchQuery }: DataTableProps) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredData.map((row, index) => (
+              {formattedData.map((row, index) => (
                 <TableRow key={index}>
                   {columns.map((column) => (
                     <TableCell key={column}>

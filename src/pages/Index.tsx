@@ -88,8 +88,9 @@ const Index = () => {
       fall_probability: item.fall_probability_percent || `${(item.fall_probability || 0).toFixed(2)}%`,
       trunk_angle: `${(item.trunk_angle || 0).toFixed(2)}°`,
       hip_angle: `${(item.hip_angle || 0).toFixed(2)}°`,
-      sit_probability: `${(item.sit_probability || 0).toFixed(2)}%`,
-      stand_probability: `${(item.stand_probability || 0).toFixed(2)}%`
+      // Correctly format sit and stand probabilities to show 0-100%
+      sit_probability: `${((item.sit_probability || 0) * 100).toFixed(2)}%`,
+      stand_probability: `${((item.stand_probability || 0) * 100).toFixed(2)}%`
     }));
   };
 
