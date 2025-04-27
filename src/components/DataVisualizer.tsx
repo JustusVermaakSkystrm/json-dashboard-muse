@@ -1,3 +1,4 @@
+
 import { useMemo } from "react";
 import { format, subHours } from "date-fns";
 import { DataPoint } from "@/types/chart";
@@ -36,8 +37,8 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
     
     const baseData = sortedData.map((item) => {
       const fallProbability = item.fall_probability / 100;
-      const sitProbability = (item.sit_probability || 0) * 100;
-      const standProbability = (item.stand_probability || 0) * 100;
+      const sitProbability = (item.sit_probability || 0) * 100; // Multiply by 100 to convert to percentage
+      const standProbability = (item.stand_probability || 0) * 100; // Multiply by 100 to convert to percentage
       const timestamp = item.timestamp;
 
       return {
@@ -68,7 +69,7 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
 
   const currentValues = useMemo(() => {
     if (chartData.length === 0) return { probability: 0, isStanding: false };
-    const latest = chartData[0];
+    const latest = chartData[chartData.length - 1]; // Use the last item in the array
     const isStanding = (latest.standProbability || 0) > (latest.sitProbability || 0);
     return {
       probability: latest.probability,
