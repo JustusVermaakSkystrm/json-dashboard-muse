@@ -15,32 +15,33 @@ interface DataTableProps {
 }
 
 const DataTable = ({ data, searchQuery }: DataTableProps) => {
-  const flattenObject = (obj: any, prefix = "") => {
-    return Object.keys(obj).reduce((acc: any, key: string) => {
-      const value = obj[key];
-      const newKey = prefix ? `${prefix}.${key}` : key;
+  // Simple console log to track incoming data
+  console.log("DataTable received data:", data);
 
-      if (typeof value === "object" && value !== null && !Array.isArray(value)) {
-        Object.assign(acc, flattenObject(value, newKey));
-      } else {
-        acc[newKey] = value;
-      }
+  // Check if data is an array
+  if (!Array.isArray(data)) {
+    console.error("DataTable expected array, received:", typeof data);
+    return (
+      <Card className="bg-white/50 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="text-lg font-medium">Data Table</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4">
+          <p>No data available</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
-      return acc;
-    }, {});
-  };
-
-  const flatData = Array.isArray(data)
-    ? data.map((item) => flattenObject(item))
-    : [flattenObject(data)];
-
-  const filteredData = flatData.filter((row) =>
+  // Process data safely
+  const columns = data.length > 0 ? Object.keys(data[0]) : [];
+  
+  // Filter data based on search query
+  const filteredData = data.filter((row) =>
     Object.values(row).some((value) =>
       String(value).toLowerCase().includes(searchQuery.toLowerCase())
     )
   );
-
-  const columns = Object.keys(flatData[0] || {});
 
   return (
     <Card className="bg-white/50 backdrop-blur-sm">
@@ -64,7 +65,7 @@ const DataTable = ({ data, searchQuery }: DataTableProps) => {
                     <TableCell key={column}>
                       {typeof row[column] === "object"
                         ? JSON.stringify(row[column])
-                        : String(row[column])}
+                        : String(row[column] || '')}
                     </TableCell>
                   ))}
                 </TableRow>

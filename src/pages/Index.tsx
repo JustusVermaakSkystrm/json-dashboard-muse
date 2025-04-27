@@ -65,6 +65,25 @@ const Index = () => {
     return () => unsubscribe();
   }, [toast]);
 
+  // Prepare table data
+  const prepareTableData = () => {
+    if (!jsonData || !Array.isArray(jsonData)) return [];
+    
+    console.log("Preparing table data from:", jsonData.length, "items");
+    
+    return jsonData.map(item => ({
+      timestamp: item.formattedTime || new Date(item.timestamp * 1000).toLocaleString(),
+      fall_probability: item.fall_probability_percent || `${(item.fall_probability || 0).toFixed(2)}%`,
+      trunk_angle: `${(item.trunk_angle || 0).toFixed(2)}°`,
+      hip_angle: `${(item.hip_angle || 0).toFixed(2)}°`,
+      sit_probability: `${(item.sit_probability || 0).toFixed(2)}%`,
+      stand_probability: `${(item.stand_probability || 0).toFixed(2)}%`
+    }));
+  };
+
+  const tableData = prepareTableData();
+  console.log("Table data ready:", tableData.length, "rows");
+
   return (
     <div className="min-h-screen p-6 space-y-6 transition-all duration-300" 
          style={{
@@ -109,14 +128,7 @@ const Index = () => {
               <KeypointsVisualizer data={jsonData} />
             </div>
             <DataTable 
-              data={jsonData.map(item => ({
-                timestamp: item.formattedTime,
-                fall_probability: item.fall_probability_percent,
-                trunk_angle: `${(item.trunk_angle || 0).toFixed(2)}°`,
-                hip_angle: `${(item.hip_angle || 0).toFixed(2)}°`,
-                sit_probability: `${(item.sit_probability || 0).toFixed(2)}%`,
-                stand_probability: `${(item.stand_probability || 0).toFixed(2)}%`
-              }))} 
+              data={tableData}
               searchQuery={searchQuery}
             />
           </>
