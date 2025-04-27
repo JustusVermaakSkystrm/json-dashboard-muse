@@ -22,6 +22,8 @@ export interface DataPoint {
 export interface ChartDataPoint {
   name: string;
   probability: number;
-  position: number;
+  sitProbability?: number;
+  standProbability?: number;
   timestamp: Date;
 }
+

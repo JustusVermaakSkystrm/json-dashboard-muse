@@ -3,6 +3,7 @@ import { format, subHours } from "date-fns";
 import { DataPoint } from "@/types/chart";
 import FallProbabilityChart from "./charts/FallProbabilityChart";
 import GaugeChart from "./charts/GaugeChart";
+import { PersonStanding, Sitting } from "lucide-react";
 
 interface DataVisualizerProps {
   data: DataPoint[];
@@ -31,22 +32,23 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
     console.log("DataVisualizer processing", data.length, "data points");
     console.log("First data point timestamp:", new Date(data[0].timestamp * 1000).toLocaleString());
     
-    // Process data in chronological order (oldest first)
     const sortedData = [...data].sort((a, b) => a.timestamp - b.timestamp);
     
-    // First, create the base data points
     const baseData = sortedData.map((item) => {
       const fallProbability = item.fall_probability / 100;
+      const sitProbability = (item.sit_probability || 0);
+      const standProbability = (item.stand_probability || 0);
       const timestamp = item.timestamp;
 
       return {
         name: format(new Date(timestamp * 1000), 'HH:mm:ss'),
         probability: Number(fallProbability),
+        sitProbability,
+        standProbability,
         timestamp: new Date(timestamp * 1000)
       };
     });
 
-    // Apply moving averages with 5 period window
     return calculateMovingAverage(baseData, 5, 'probability');
   }, [data]);
 
@@ -65,20 +67,29 @@ const DataVisualizer = ({ data }: DataVisualizerProps) => {
   }, [chartData]);
 
   const currentValues = useMemo(() => {
-    if (chartData.length === 0) return { probability: 0 };
-    const latest = chartData[0]; // Use the first item as it's the newest after sorting
+    if (chartData.length === 0) return { probability: 0, isStanding: false };
+    const latest = chartData[0];
+    const isStanding = (latest.standProbability || 0) > (latest.sitProbability || 0);
     return {
-      probability: latest.probability
+      probability: latest.probability,
+      isStanding
     };
   }, [chartData]);
 
   return (
     <div className="grid grid-cols-1 gap-4">
-      <div className="flex justify-center">
+      <div className="flex justify-center items-center gap-4">
         <GaugeChart 
           value={currentValues.probability}
           title="Status" 
         />
+        <div className="bg-white/5 backdrop-blur-sm rounded-lg p-4 flex items-center justify-center w-[200px] h-[200px]">
+          {currentValues.isStanding ? (
+            <PersonStanding className="w-24 h-24 text-green-400" />
+          ) : (
+            <Sitting className="w-24 h-24 text-blue-400" />
+          )}
+        </div>
       </div>
       <FallProbabilityChart 
         data={lastHourData} 
