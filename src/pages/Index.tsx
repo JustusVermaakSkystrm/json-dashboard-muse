@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { Upload, Settings } from "lucide-react";
+import { Upload } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -23,9 +23,8 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
 
-  // Fetch fall data
   useEffect(() => {
-    console.log("Starting Firebase data fetch");
+    console.log("Starting Firebase data fetch...");
     
     // Set up real-time listener for fall data
     const q = query(
@@ -50,9 +49,7 @@ const Index = () => {
         }));
 
         console.log(`Processed ${data.length} documents from Firebase`);
-        if (data.length > 0) {
-          console.log("First document sample:", data[0]);
-        }
+        console.log("First document sample:", data[0]);
         
         setJsonData(data);
       } catch (error) {
@@ -138,6 +135,7 @@ const Index = () => {
               </h3>
               <p className="text-gray-200 text-center max-w-md">
                 Connecting to database and fetching real-time fall detection data.
+                Check console for connection status.
               </p>
             </CardContent>
           </Card>
