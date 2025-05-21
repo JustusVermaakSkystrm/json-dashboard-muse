@@ -1,7 +1,5 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/lib/auth";
 import { useToast } from "@/components/ui/use-toast";
 import { Upload, Settings } from "lucide-react";
 import {
@@ -16,61 +14,22 @@ import DataTable from "@/components/DataTable";
 import KeypointsVisualizer from "@/components/KeypointsVisualizer";
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/lib/firebase";
-import { collection, onSnapshot, query, orderBy, where, getDoc, doc } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import BrandLogo from "@/components/BrandLogo";
 import AIActivityIndicator from "@/components/AIActivityIndicator";
 
 const Index = () => {
   const [jsonData, setJsonData] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [deviceId, setDeviceId] = useState<string | null>(null);
-  const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
 
-  // Fetch user's device ID
+  // Fetch fall data
   useEffect(() => {
-    const fetchUserSettings = async () => {
-      if (!user) return;
-      
-      try {
-        const userDocRef = doc(db, "userSettings", user.uid);
-        const userDoc = await getDoc(userDocRef);
-        
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          setDeviceId(data.deviceId);
-        } else {
-          // If no device is set up, redirect to settings
-          toast({
-            title: "No device configured",
-            description: "Please set up your device ID in settings.",
-          });
-          navigate("/settings");
-        }
-      } catch (error) {
-        console.error("Error fetching user settings:", error);
-        toast({
-          title: "Error",
-          description: "Failed to fetch your device settings.",
-          variant: "destructive",
-        });
-      }
-    };
+    console.log("Starting Firebase data fetch");
     
-    fetchUserSettings();
-  }, [user, toast, navigate]);
-
-  // Fetch fall data for user's device
-  useEffect(() => {
-    if (!deviceId) return;
-    
-    console.log("Starting Firebase data fetch for device:", deviceId);
-    
-    // Set up real-time listener for fall data, filtered by device ID
+    // Set up real-time listener for fall data
     const q = query(
       collection(db, 'fallData'),
-      where("deviceId", "==", deviceId),
       orderBy('timestamp', 'desc')
     );
 
@@ -115,7 +74,7 @@ const Index = () => {
 
     // Cleanup subscription
     return () => unsubscribe();
-  }, [deviceId, toast]);
+  }, [toast]);
 
   // Prepare table data
   const prepareTableData = () => {
@@ -168,11 +127,6 @@ const Index = () => {
               </div>
             </div>
           </div>
-          
-          <Button variant="outline" onClick={() => navigate("/settings")} className="gap-2">
-            <Settings className="h-4 w-4" />
-            Settings
-          </Button>
         </div>
 
         {!jsonData ? (
@@ -180,22 +134,11 @@ const Index = () => {
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Upload className="h-12 w-12 text-gray-400 mb-4" />
               <h3 className="text-lg font-medium text-white mb-2">
-                {deviceId ? "Loading Data..." : "No Device Configured"}
+                Loading Data...
               </h3>
               <p className="text-gray-200 text-center max-w-md">
-                {deviceId 
-                  ? "Connecting to database and fetching real-time fall detection data for your device."
-                  : "Please go to settings and configure your device ID."
-                }
+                Connecting to database and fetching real-time fall detection data.
               </p>
-              {!deviceId && (
-                <Button 
-                  className="mt-4" 
-                  onClick={() => navigate("/settings")}
-                >
-                  Go to Settings
-                </Button>
-              )}
             </CardContent>
           </Card>
         ) : (
